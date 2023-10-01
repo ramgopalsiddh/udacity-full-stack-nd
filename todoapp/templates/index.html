@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <script type = "text/javascript" src="{{url_for('static', filename='todos.js')}}"></script>
+    <script src="{{url_for('static', filename='lists.js')}}"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='index.css') }}">
+</head>
+<body>
+    <h3>A SAMPLE VERSION OF TODO APP</h3>
+    <div class="lists-wrapper">
+     
+        <!-- for list-->
+        <h4>TODO LISTS</h4>
+        <form id="listform"  action="/lists/create" method="POST" id="list-form">
+          <label for="todolist">Create List:</label>
+          <input type="text" name="todolist" id="todolist-input" placeholder="A new List" data-id="{{ active_list.id }}"/>
+          <button type="submit">Create List</button>
+        </form>       
+
+        <ul id="lists">
+            {% for list in lists %}
+            <li>
+                <input type="checkbox" data-id="{{ list.id }}" class="list-check-completed">
+                <a href="/lists/{{ list.id }}">
+                    {{ list.name }}
+                </a>
+                <button class="delete-list" data-id="{{ list.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+       </ul>
+    </div>
+    
+
+    <!-- for todo-->
+    <div class="todos-wrapper">
+        <h4> LIST NAME : {{ active_list.name }}</h4>
+        <h4>TODO ITEMS</h4>
+        <form id="form" data-activeListId="{{ active_list.id }}" >
+            <input type="text" id="description" name="description" placeholder="create A new todo"/>
+            <input type="submit" value="Create todo" onclick="createTodo()">
+        </form>
+        <div id="error" class="hidden">something went werong</div>
+
+        <ul id="todos">
+            {% for todo in todos %}
+            <li> 
+                <input class="check-completed" data-todoId="{{ todo.id }}" type = "checkbox" {% if todo.completed == True %} checked=true {% endif %} />  
+                {{ todo.description }} 
+                \<button class="delete-button" data-todoId="{{ todo.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
