@@ -35,6 +35,7 @@ def __repr__(self):
 with app.app_context():
     db.create_all()
 
+# todo routes
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
     body = {}
@@ -75,8 +76,6 @@ def set_completed_todo(todo_id):
 @app.route('/todos/<todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
     try:
-       # Todo.query.filter_by(id=todo_id).delete()
-    #edited in last change
         todo = Todo.query.get(todo_id)
         db.session.delete(todo)
 
@@ -88,8 +87,13 @@ def delete_todo(todo_id):
         db.session.close()
     return jsonify({ 'success': True })
 
-
-# operation for lists
+# list routes
+@app.route('/lists/<list_id>')
+def get_list_todos(list_id):
+   return render_template('index.html', 
+   lists=TodoList.query.all(),
+   active_list=TodoList.query.get(list_id),
+   todos=Todo.query.filter_by(list_id=list_id).order_by('id').all())
 
 @app.route('/lists/create', methods=['POST'])
 def create_list():
@@ -112,29 +116,10 @@ def create_list():
     return jsonify({ 'success': True })
 
 
-
-@app.route('/lists/<list_id>/set-completed', methods=['POST'])
-def set_completed_list(list_id):
-    try:
-        completed = request.get_json()['completed']
-        print('completed', completed)
-        list = List.query.get(list_id)
-        list.completed = completed
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({ 'success': False })
-    finally:
-        db.session.close()
-    return jsonify({ 'success': True })
-
-
 @app.route('/lists/<list_id>', methods=['DELETE'])
 def delete_list(list_id):
     try:
-       # Todo.query.filter_by(id=todo_id).delete()
-    #edited in last change
-        list = List.query.get(list_id)
+        list = TodoList.query.get(list_id)
         db.session.delete(list)
 
         db.session.commit()
@@ -146,26 +131,12 @@ def delete_list(list_id):
     return jsonify({ 'success': True })
 
 
-# routes
-
+# root route
 @app.route('/')
 def index():
+    # TODO: don't redirect to list 1 by default
     return redirect(url_for('get_list_todos', list_id=1))
 
-
-
-@app.route('/lists/<list_id>')
-def get_list_todos(list_id):
-   return render_template('index.html', 
-   lists=TodoList.query.all(),
-   active_list=TodoList.query.get(list_id),
-   todos=Todo.query.filter_by(list_id=list_id).order_by('id').all())
-
-   return render_template('index.html', todos=todos, lists=lists, active_list=active_list)
-
-
-
-if __name__ == '__main__':
-    
+if __name__ == '__main__':    
     app.run(debug=True)
    

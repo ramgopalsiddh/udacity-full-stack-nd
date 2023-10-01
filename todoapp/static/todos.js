@@ -30,7 +30,7 @@ function createTodo() {
     }
 }
 
-function markComplete() {
+function completeTodo() {
     // check box for todos
     const checkboxes = document.querySelectorAll('.check-completed');
     for (let i = 0; i < checkboxes.length; i++) {
@@ -60,21 +60,24 @@ function markComplete() {
     }
 }
 
+function deleteTodo() {
   // delete for todo
      const deleteBtns = document.querySelectorAll('.delete-button');
      for (let i = 0; i < deleteBtns.length; i++) {
          const btn = deleteBtns[i];
          btn.onclick = function(e) {
-             const todoId = btn.getAttribute('data-todoId');
-             fetch('/todos/' + todoId, {
-                 method: 'DELETE'
-             })
-             .then(function(response){
-               console.log("Success", response);
-               window.location.href = '';
-             })
-              .catch(function(){
-               console.log("Error", response);
-             })
-         }
-     }
+            const todoId = btn.getAttribute('data-todoId');
+            fetch('/todos/' + todoId, {
+                method: 'DELETE'
+            })
+            .then(function(response){
+                console.log("Success", response);
+                window.location.href = '';
+            })
+                .catch(function(){
+                console.log("Error", response);
+            })
+        }
+    }
+   
+}
