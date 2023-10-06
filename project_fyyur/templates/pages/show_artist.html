@@ -20,12 +20,12 @@
 		<p>
 			<i class="fas fa-phone-alt"></i> {% if artist.phone %}{{ artist.phone }}{% else %}No Phone{% endif %}
         </p>
-        <p>
+        <!-- <p>
 			<i class="fas fa-link"></i> {% if artist.website %}<a href="{{ artist.website }}" target="_blank">{{ artist.website }}</a>{% else %}No Website{% endif %}
-		</p>
+		</p> -->
 		<p>
 			<i class="fab fa-facebook-f"></i> {% if artist.facebook_link %}<a href="{{ artist.facebook_link }}" target="_blank">{{ artist.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
-        </p>
+        <!-- </p>
 		{% if artist.seeking_venue %}
 		<div class="seeking">
 			<p class="lead">Currently seeking performance venues</p>
@@ -36,7 +36,7 @@
 		{% else %}	
 		<p class="not-seeking">
 			<i class="fas fa-moon"></i> Not currently seeking performance venues
-		</p>
+		</p> -->
 		{% endif %}
 	</div>
 	<div class="col-sm-6">
