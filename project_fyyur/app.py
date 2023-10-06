@@ -378,24 +378,24 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
 # TODO: populate form with fields from artist with ID <artist_id>
 
 #update according to requirement for "edit artists route"
   artist = Artist.query.get(artist_id)
+  form = ArtistForm(obj=artist)
 
-  artist_data={
-    "id": artist.id,
-    "name": artist.name,
-    "genres": artist.genres,
-    "city": artist.city,
-    "state": artist.state,
-    "phone": artist.phone,
-    "facebook_link": artist.facebook_link,
-    "image_link": artist.image_link
-  }
+  # artist_data={
+  #   "id": artist.id,
+  #   "name": artist.name,
+  #   "genres": artist.genres,
+  #   "city": artist.city,
+  #   "state": artist.state,
+  #   "phone": artist.phone,
+  #   "facebook_link": artist.facebook_link,
+  #   "image_link": artist.image_link
+  # }
 
-  return render_template('forms/edit_artist.html', form=form, artist=artist)
+  return render_template('forms/edit_artist.html', form=form, artist_id=artist_id)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -405,18 +405,18 @@ def edit_artist_submission(artist_id):
 
  #update according to requirement for " submit edit artists route"
   try:
-      form = ArtistForm()
+      form = ArtistForm(request.form)
       artist = Artist.query.get(artist_id)
       
-      name = form.name.data
-
-      artist.name = name
+      artist.name = form.name.data
       artist.phone = form.phone.data
       artist.state = form.state.data
       artist.city = form.city.data
       artist.genres = form.genres.data
       artist.image_link = form.image_link.data
       artist.facebook_link = form.facebook_link.data
+
+      #import pdb; pdb.set_trace()
 
       db.session.commit()
       flash('The Artist ' + request.form['name'] + ' has been successfully updated!')
@@ -433,28 +433,11 @@ def edit_artist_submission(artist_id):
 #  ----------------------------------------------------------------------------------------------------
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
-def edit_venue(venue_id):
-  form = VenueForm()
-  # TODO: populate form with values from venue with ID <venue_id>
-  
-  #update according to requirement for "edit venue route"
+def edit_venue(venue_id):  
   venue = Venue.query.get(venue_id)
-  venue = {
-    "id": venue_id,
-    "name": venue.name,
-    "genres": venue.genres,
-    "address": venue.address,
-    "city": venue.city,
-    "state": venue.state,
-    "phone": venue.phone,
-    "website":venue.website,
-    "facebook_link": venue.facebook_link,
-    "seeking_talent": venue.seeking_talent,
-    "seeking_description": venue.seeking_description,
-    "image_link": venue.image_link
-  } 
+  form = VenueForm(obj=venue)
 
-  return render_template('forms/edit_venue.html', form=form, venue=venue)
+  return render_template('forms/edit_venue.html', form=form, venue_id=venue_id)
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -464,11 +447,10 @@ def edit_venue_submission(venue_id):
 
 #update according to requirement for "submit edited venue route"
   try:
-    form = VenueForm()
+    form = VenueForm(request.form)
     venue = Venue.query.get(venue_id)
-    name = VenueForm.name.data
 
-    venue.name = name
+    venue.name = form.name.data
     venue.genres = form.genres.data
     venue.city = form.city.data
     venue.state = form.state.data
@@ -481,7 +463,7 @@ def edit_venue_submission(venue_id):
     venue.seeking_description = form.seeking_description.data
 
     db.session.commit()
-    flash('Venue ' + name + 'has been updated')
+    flash('Venue ' + form.name.data + ' has been updated')
   except:
     db.session.rollback()
     flash('An error occured while trying to update Venue')
