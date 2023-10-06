@@ -15,6 +15,7 @@ from forms import *
 # add new in changes
 from flask_migrate import Migrate
 import config
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -29,6 +30,7 @@ migrate = Migrate(app, db)
 # TODO: connect to a local postgresql database
 
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_ECHO'] = config.SQLALCHEMY_ECHO
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -242,13 +244,15 @@ def create_venue_submission():
  #update according to requirement for "create venue operation"
   try:
     # get form data and create
-    form = VenueForm()
+    form = VenueForm(request.form)
     venue = Venue(name=form.name.data, city=form.city.data, state=form.state.data, address=form.address.data,
                   phone=form.phone.data, image_link=form.image_link.data, genres=form.genres.data,
                   facebook_link=form.facebook_link.data, seeking_description=form.seeking_description.data,
                   website=form.website.data, seeking_talent=form.seeking_talent.data)
     # coomit session to database
+    #logging.debug("creating venues:", form, venue)
     db.session.add(venue)
+    # import pdb; pdb.set_trace()
     db.session.commit()
     # flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
@@ -508,7 +512,7 @@ def create_artist_submission():
 
 #update according to requirement for "created artist submission route"
   try:
-    form = ArtistForm()
+    form = ArtistForm(request.form)
     artist = Artist(name=form.name.data, city=form.city.data, state=form.state.data,
                     phone=form.phone.data, genres=form.genres.data,
                     image_link=form.image_link.data, facebook_link=form.facebook_link.data)
