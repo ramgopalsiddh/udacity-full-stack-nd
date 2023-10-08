@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -165,8 +165,9 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        # Regexp from https://uibakery.io/regex-library/phone-number-python under the section
+        # The more complex phone number validation
+        'phone', validators=[DataRequired(), Regexp("^\\+?\\d{1,4}?[-.\\s]?\\(?\\d{1,3}?\\)?[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,9}$", message="Phone number provided is not accepted")]
     )
     image_link = StringField(
         'image_link'
@@ -196,8 +197,7 @@ class ArtistForm(Form):
         ]
      )
     facebook_link = StringField(
-        # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+    'facebook_link', validators=[URL(require_tld=True, message='Invalid URL. Must be a valid Facebook URL.')]
      )
     website = StringField(
         'website'
