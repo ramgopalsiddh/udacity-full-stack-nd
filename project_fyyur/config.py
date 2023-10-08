@@ -11,6 +11,6 @@ SQLALCHEMY_ECHO = True
 # Connect to the database
 
 
-# TODO IMPLEMENT DATABASE URL
+# DONE IMPLEMENT DATABASE URL
 SQLALCHEMY_DATABASE_URI = 'postgresql://ram@localhost:5432/fyyur'
 
