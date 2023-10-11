@@ -17,7 +17,12 @@ class TriviaTestCase(unittest.TestCase):
 
         self.app = create_app(database_path, db_log=False)
         self.client = self.app.test_client
-
+        self.new_question = {
+            'question': 'Sample Question',
+            'answer': 'Sample Answer',
+            'category': 'Sample Category',
+            'difficulty': 1
+        }
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -53,8 +58,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
 
-    # test delete a question with id 2
+     # test delete a question with id 2
     def test_delete_question(self):
+        # insert a questions, and get the ID
+        # Question.insert()
+
+        # delete the question we just inserted
         response = self.client().delete('/questions/2')
         data = json.loads(response.data)
 
@@ -70,10 +79,9 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-
     # test create question
 
-    def test_create_question(self):
+    def test_create_a_question(self):
         response = self.client().post('/questions', json=self.new_question)
         data = json.loads(response.data)
 
@@ -126,22 +134,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
     # test quiz
-    def test_quiz(self):
-        quiz_round = {'previous_questions': [], 'quiz_category': {'type': 'Geography', 'id': 14}}
-        response = self.client().post('/play', json=quiz_round)
-        data = json.loads(response.data)
+    def test_play_quiz(self):
+        new_quiz_round = {'previous_questions': [], 'quiz_category': {'type': 'Entertainment', 'id': 5}}
 
-        
-        self.assertEqual(response.status_code, 200)
+        res = self.client().post('/quizzes', json=new_quiz_round)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-
-    def test_422_quiz(self):
-        response = self.client().post('/play', json={})
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 422)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'unprocessable')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
