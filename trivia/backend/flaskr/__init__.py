@@ -1,15 +1,13 @@
-import os
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import random
+
+from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
-# db = SQLAlchemy()
-
+# paginate questions for a request and return the current page
 def paginate_questions(request, selection):
     page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -18,12 +16,20 @@ def paginate_questions(request, selection):
     current_questions = questions[start:end]
     return current_questions
 
+# does the following things:
+#   - create Flask app
+#   - setup database
+#   - setup CORS
+#   - add and register routes and handlers
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
 
     with app.app_context():
-       setup_db(app)
+        database_name = 'trivia'
+        database_path = 'postgresql://ram@localhost:5432/{}'.format( database_name)
+
+        setup_db(app, database_path)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
@@ -140,7 +146,7 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
-# Create question POST METHOD
+    # Create question POST METHOD
     @app.route('/questions', methods=['POST'])
     def create_a_question():
         if request.method == "POST":
@@ -189,7 +195,7 @@ def create_app(test_config=None):
     category to be shown.
     """
 
-# GET questions by a category
+    # GET questions by a category
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])
     def get_questions_by_category(category_id):
         if request.method == "GET":
@@ -295,7 +301,4 @@ def create_app(test_config=None):
                 "message": "internal server error"
             }), 422
 
-
-
     return app
-

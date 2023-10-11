@@ -2,21 +2,14 @@ import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
-from flask import Flask
-app = Flask(__name__)
-
-
-with app.app_context():
-    database_name = 'trivia'
-    database_path = 'postgresql://ram@localhost:5432/{}'.format( database_name)
 
 db = SQLAlchemy()
 
 """
-setup_db(app)
+setup_db(app. database_path)
     binds a flask application and a SQLAlchemy service
 """
-def setup_db(app, database_path=database_path):
+def setup_db(app, database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
