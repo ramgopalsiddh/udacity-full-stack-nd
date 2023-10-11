@@ -226,7 +226,7 @@ def create_app(database_path, db_log):
     """
 
     @app.route('/quizzes', methods=['POST'])
-    def play_game():
+    def play_quiz():
         if request.method == "POST":
             try:
                 body = request.get_json()
