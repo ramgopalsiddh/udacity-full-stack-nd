@@ -21,15 +21,12 @@ def paginate_questions(request, selection):
 #   - setup database
 #   - setup CORS
 #   - add and register routes and handlers
-def create_app(test_config=None):
+def create_app(database_path, db_log):
     # create and configure the app
     app = Flask(__name__)
 
     with app.app_context():
-        database_name = 'trivia'
-        database_path = 'postgresql://ram@localhost:5432/{}'.format( database_name)
-
-        setup_db(app, database_path)
+        setup_db(app, database_path, db_log)
 
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
