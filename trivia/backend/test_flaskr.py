@@ -17,6 +17,8 @@ class TriviaTestCase(unittest.TestCase):
 
         self.app = create_app(database_path, db_log=False)
         self.client = self.app.test_client
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         self.new_question = {
             'question': 'Sample Question',
             'answer': 'Sample Answer',
@@ -58,18 +60,24 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data['success'], False)
 
-     # test delete a question with id 2
+    # test delete a question with id 
     def test_delete_question(self):
-        # insert a questions, and get the ID
-        # Question.insert()
+        question = Question(question='new question', answer='new answer',
+                    difficulty=1, category=1)
+        question.insert()
+        question_id = question.id
 
-        # delete the question we just inserted
-        response = self.client().delete('/questions/2')
-        data = json.loads(response.data)
+        with self.app.app_context():  # set the application context
+            res = self.client().delete(f'/questions/{question_id}')
+            data = json.loads(res.data)
 
-        self.assertEqual(response.status_code, 200)
+        question = Question.query.filter(
+            Question.id == question.id).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'],2)
+        self.assertEqual(int(data['deleted']), question_id)
+        self.assertEqual(question, None)
 
     
     # test detele a questions with a id that is not in the database
