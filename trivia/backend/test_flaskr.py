@@ -89,12 +89,21 @@ class TriviaTestCase(unittest.TestCase):
 
     # test create question
 
-    def test_create_a_question(self):
-        response = self.client().post('/questions', json=self.new_question)
-        data = json.loads(response.data)
+    def test_store_question(self):
+        new_question = {
+            'question': 'new question',
+            'answer': 'new answer',
+            'difficulty': 1,
+            'category': 1
+        }
+        total_questions_before = len(Question.query.all())
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.data)
+        total_questions_after = len(Question.query.all())
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], True)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(total_questions_after, total_questions_before + 1)
 
     def test_405_question_creation_not_allowed(self):
         response = self.client().post('/questions/45', json=self.new_question)
