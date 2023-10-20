@@ -26,6 +26,10 @@
 
         <ion-button (click)="removeIngredient(i)" [disabled]="i==0 && drink.recipe.length==1">Remove</ion-button><br />
         <ion-button (click)="addIngredient(i)" [disabled]="drink.recipe.length==5">ADD</ion-button><br />
+      <!-- TODO - i am add price but don't fit in page for fitting need to change
+        Add Price Input Field
+      <ion-label>Price</ion-label>
+      <ion-input type="number" [(ngModel)]="drink.recipe[i].price" [name]="'Ingredient Price'+i"></ion-input> -->
 
       </ion-item>
 
@@ -33,7 +37,7 @@
         [disabled]="!auth.can('delete:drinks')"
         (click)="deleteClicked()">Delete</ion-button><br />
       <ion-button (click)="closeModal()">Cancel</ion-button>
-      <ion-button 
+      <ion-button
         [disabled]="!auth.can('patch:drinks') || !auth.can('post:drinks')"
         (click)="saveClicked()">Save</ion-button>
 
