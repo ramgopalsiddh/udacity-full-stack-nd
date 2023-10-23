@@ -85,3 +85,18 @@ There are `@TODO` comments throughout the `./backend/src`. We recommend tackling
 
 1. `./src/auth/auth.py`
 2. `./src/api.py`
+
+
+
+# run (edited by ram gopal siddh )
+ - export FLASK_APP=api.py;
+  - run echo $FLASK_APP and get flask app name = api.py and than run 
+  - flask run --reload
+
+### jwt token genrate url
+ - https://{yourDomain}/authorize?response_type=token&scope=openid%20profile&client_id={yourClientId}&redirect_uri=http://jwt.io&connection={connectionToTest}
+
+- https://{{YOUR_DOMAIN}}/authorize?audience={{API_IDENTIFIER}}&response_type=token&client_id={{YOUR_CLIENT_ID}}&redirect_uri={{YOUR_CALLBACK_URI}}
+
+#### Auth0 document link
+ - https://auth0.com/docs/authenticate/identity-providers/test-connections
