@@ -33,3 +33,44 @@ The `./backend` directory contains a partially completed Flask server with a pre
 The `./frontend` directory contains a complete Ionic frontend to consume the data from the Flask server. You will only need to update the environment variables found within (./frontend/src/environment/environment.ts) to reflect the Auth0 configuration details set up for the backend app.
 
 [View the README.md within ./frontend for more details.](./frontend/README.md)
+
+
+# screenshots
+
+
+### home page when manager login
+
+ <img src="screenshot/home.png"/>
+
+ <img src="screenshot/home_1.png"/>
+
+
+### home page when barista login
+
+  <img src="screenshot/home_page_barista.png"/>
+
+
+  ### Auth0 Authentication login page 
+
+   <img src="screenshot/login_page_1.png"/>
+
+   <img src="screenshot/login_page_2.png"/>
+
+
+  ### user page after login (jwt token)
+   <img src="screenshot/user_page.png"/>
+
+
+  ### create drink page (only manager has access for create drink)
+
+   <img src="screenshot/create_drink_1.png"/>
+
+   <img src="screenshot/create_drink_2.png"/>
+
+   <img src="screenshot/create_drink_3.png"/>
+
+
+
+
+
+
