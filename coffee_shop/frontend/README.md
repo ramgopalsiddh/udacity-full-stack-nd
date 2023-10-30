@@ -58,3 +58,6 @@ The Auth0 JWT includes claims for permissions based on the user's role within th
 ## TODO
 coffee_shop/frontend/src/app/pages/drink-menu/drink-form/drink-form.component.html
  - add price of coffee
+
+ # run frontend 
+ - go inside the frontend directory and then run by command " npm start "
