@@ -17,58 +17,6 @@ This app is nearly complete. It is only missing one thing… real data! While th
 
 We want Fyyur to be the next new platform that artists and musical venues can use to find each other, and discover new music shows. Let's make that happen!
 
-# screenshots 
-
-
-### HOME
-   <img src="screenshot/home.png"/>
-
-### VENUES 
-   <img src="screenshot/venues.png"/>
-
-#### Get Venue's Detail
-   <img src="screenshot/venue_detail_1.png"/>
-   <img src="screenshot/venue_detail_2.png"/>
-
-#### Create New venue
-   <img src="screenshot/new_venue_1.png"/>
-   <img src="screenshot/new_venue_2.png"/>
-
-#### Edit Existing Venue
-   <img src="screenshot/edit_venue_1.png"/>
-   <img src="screenshot/edit_venue_2.png"/>
-
-#### Search Venue
-   <img src="screenshot/search_venue.png"/>
-
-
-### ARTIST 
-
-   <img src="screenshot/artists.png"/>
-
-#### Get Artist's Detail
-   <img src="screenshot/artist_detail.png"/>
-
-#### Create New Artist
-   <img src="screenshot/new_artist.png"/>
-
-#### Edit Existing Artist
-   <img src="screenshot/edit_artist.png"/>
-
-#### Search Artist
-   <img src="screenshot/search_artist_1.png"/>
-
-
-### SHOW
-
-#### All Shows
-   <img src="screenshot/shows.png"/>
-
-#### Create New Show
-   <img src="screenshot/new_show.png"/>
-
-
-
 
 ## Tech Stack (Dependencies)
 
