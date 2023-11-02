@@ -17,6 +17,10 @@ This app is nearly complete. It is only missing one thing… real data! While th
 
 We want Fyyur to be the next new platform that artists and musical venues can use to find each other, and discover new music shows. Let's make that happen!
 
+# YouTube video link 
+ - ### Project's YouTube video link :-   https://youtu.be/LBD0sOBiPLs
+
+
 # screenshots 
 
 
