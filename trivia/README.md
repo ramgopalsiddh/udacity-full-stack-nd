@@ -14,6 +14,60 @@ That's where you come in! Help them finish the trivia app so they can start hold
 
 Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
 
+# screenshots 
+
+### HOME
+  <img src="Screenshot/home_1.png"/>
+
+### Home/Art category
+  <img src="Screenshot/home_Art.png"/>
+
+### Home/Entertainmen category
+  <img src="Screenshot/home_Entertainment.png"/>
+
+### Home/Geography category
+  <img src="Screenshot/home_Geography.png"/>
+
+### Home/History category
+  <img src="Screenshot/home_History.png"/>
+
+### Home/Science category
+  <img src="Screenshot/home_Science.png"/>
+
+### Home/Sports category
+  <img src="Screenshot/home_Sports.png"/>
+
+
+### Access On Network
+  <img src="Screenshot/Access_On_Your_Network.png"/>
+
+### Acess on Moblie but on same Network
+  <img src="Screenshot/Access_on_Network_by_mobile.jpg"/>
+
+
+### Add New Question in Trivia
+  <img src="Screenshot/Add_a_New_Trivia_Question_1.png"/>
+  <img src="Screenshot/Add_a_New_Trivia_Question_2.png"/>
+  <img src="Screenshot/Add_a_New_Trivia_Question_3.png"/>
+
+
+### Show Answer
+  <img src="Screenshot/show_Answer.png"/>
+
+
+### Play game and get Result
+  <img src="Screenshot/play_game_1.png"/>
+  <img src="Screenshot/play_game_2.png"/>
+  <img src="Screenshot/play_game_3.png"/>
+  <img src="Screenshot/play_game_4.png"/>
+
+
+### Search Question
+  <img src="Screenshot/Search.png"/>
+
+
+
+
 ## Starting and Submitting the Project
 
 [Fork](https://help.github.com/en/articles/fork-a-repo) the project repository and [clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
