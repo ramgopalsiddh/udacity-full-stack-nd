@@ -13,6 +13,8 @@ That's where you come in! Help them finish the trivia app so they can start hold
 5. Play the quiz game, randomizing either all questions or within a specific category.
 
 Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+# YouTube video link 
+ - ### Project's YouTube video link :- https://youtu.be/NO9CLrjgiTI
 
 # screenshots 
 
