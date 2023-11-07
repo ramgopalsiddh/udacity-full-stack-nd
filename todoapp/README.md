@@ -1,5 +1,33 @@
 
-## todoapp
+# todoapp
+
+## screenshots 
+
+### HOME
+  <img src="screenshot/home.png"/>
+
+### Create a new list
+  <img src="screenshot/create_new_list_1.png"/>
+  <img src="screenshot/create_new_list_2.png"/>
+
+### Create new todo
+  <img src="screenshot/create_new_todo_1.png"/>
+  <img src="screenshot/create_new_todo_2.png"/>
+  <img src="screenshot/create_new_todo_3.png"/>
+
+### Delete a todo
+  <img src="screenshot/delete_todo.png"/>
+
+### Delete a list
+  <img src="screenshot/delete_list.png"/>
+
+### Mark complete a todo
+  <img src="screenshot/complete_todo.png"/>
+
+### Home after all operation(modification)
+  <img src="screenshot/home_after_all_modificatoin.png"/>
+
+
 
 tech stack used
 
