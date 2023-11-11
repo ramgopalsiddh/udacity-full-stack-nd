@@ -1,13 +1,23 @@
 .cup {
     width: 50px;
-    height: 50px;
+    height: 100px; /* Adjust the height based on the number of ingredients you expect */
     display: flex;
     flex-direction: column;
     border-radius: 7px;
+    border: 1.5px solid black;
     overflow: hidden;
-}
-
-.ingredient {
-    width: 50px;
-    flex-grow: 1;
-}
+    background-color: #fcfafa; /* Set a background color for the cup */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
+  
+    .ingredient {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px; /* Set the font size for ingredient text */
+      color: white; /* Text color for better contrast with background */
+      text-transform: capitalize; /* Capitalize ingredient names */
+    //   border-bottom: 1px solid #ccc; /* Add a border between ingredients */
+    }
+  }
+  
