@@ -1,1 +1,29 @@
 
+// Styling for ion-tabs
+ion-tabs {
+    // Add any global styling for ion-tabs here
+  
+    ion-tab-bar {
+      // Styling for the ion-tab-bar at the bottom
+      background-color: #f1f4f6; // Change the color as needed
+      color: #b53232; // Change the text color as needed
+  
+      ion-tab-button {
+        // Styling for each ion-tab-button
+        ion-icon {
+          font-size: 3em; // Adjust the icon size as needed
+        }
+  
+        ion-label {
+          font-size: 0.8em; // Adjust the label font size as needed
+        }
+  
+        &.tab-selected {
+          // Styling for the selected tab
+          background-color: #2c3e50; // Change the color as needed
+          color: #af9b9b; // Change the text color as needed
+        }
+      }
+    }
+  }
+  
