@@ -1,0 +1,19 @@
+:host {
+    padding-left: 10px;
+}
+
+ion-header {
+    ion-toolbar {
+      ion-title {
+        align-items: center;
+      }
+    }
+  }
+  
+  ion-content {
+    margin-top: 20px;
+
+    app-drink-graphic {
+      padding: 10px;
+    }
+   }
