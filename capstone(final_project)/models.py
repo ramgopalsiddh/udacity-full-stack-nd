@@ -9,10 +9,10 @@ from flask_migrate import Migrate
 
 # Database setup
 
-database_name = "capstone"
+# database_name = "capstone"
 # database_path = "postgres://{}/{}".format('localhost:5432', database_name)
-database_path = "postgres:///{}".format(database_name)
-database_path = os.environ['DATABASE_URL']
+# database_path = "postgres:///{}".format(database_name)
+database_path = os.getenv('DATABASE_URL')
 db = SQLAlchemy()
 
 '''
@@ -23,7 +23,7 @@ setup_db(app)
 
 def setup_db(app, database_path=database_path):
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://ram@localhost:5432/capstone"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
