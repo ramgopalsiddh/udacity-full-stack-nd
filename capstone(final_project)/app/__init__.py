@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 from models import Movie, Actor, setup_db
-from auth import requires_auth, AuthError
+from auth.auth import requires_auth, AuthError
 
 from datetime import datetime
 
@@ -29,6 +29,9 @@ def create_app(test_config=None):
         return response
 
 ############################### GET movies and actor end point #############################
+    @app.route('/')
+    def hello():
+        return "hello welcom in Movies" 
 
         '''
     GET /movies
