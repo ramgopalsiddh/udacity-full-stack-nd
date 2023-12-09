@@ -1,5 +1,5 @@
 import json
-from flask import request, _request_ctx_stack
+from flask import request
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -7,13 +7,17 @@ import os
 
 
 """
-https://fsnd-kml.auth0.com/authorize?audience=capstone&response_type=token&client_id=QgmGth71OqndSVlCJ6YIAFir6t2EAt48&redirect_uri=http://localhost:8100/login-results
-https://fsnd-kml.auth0.com/.well-known/jwks.json
+https://ramgopalsiddh.us.auth0.com/authorize?audience=capstone&response_type=token&client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y&redirect_uri=http://localhost:8100/login-results
+https://ramgopalsiddh.us.auth0.com/.well-known/jwks.json
 """
 
-AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
-ALGORITHMS = [os.environ['ALGORITHMS']]
-API_AUDIENCE = os.environ['API_AUDIENCE']
+# AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
+# ALGORITHMS = [os.environ['ALGORITHMS']]
+# API_AUDIENCE = os.environ['API_AUDIENCE']
+
+AUTH0_DOMAIN="ramgopalsiddh.us.auth0.com"
+ALGORITHMS="RS256"
+API_AUDIENCE="capstone"
 
 # AuthError Exception
 '''
