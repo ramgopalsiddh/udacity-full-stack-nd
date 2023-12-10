@@ -77,7 +77,7 @@ def create_app(test_config=None):
     }
     """
 
-    # GET/moves route
+    # GET /movies route
     @app.route("/movies", methods=["GET"])
     @requires_auth("view:movies")
     def retrieve_movies(payload):
@@ -169,7 +169,7 @@ def create_app(test_config=None):
 
         return jsonify({"success": True})
 
-        """
+    """
     POST /actors
     Creates a new actor.
     Requires the name, age and gender of the actor.
@@ -211,7 +211,9 @@ def create_app(test_config=None):
 
         return jsonify({"success": True})
 
-    ############################### DELETE movies and actor end point #############################
+    ##################################
+    # DELETE movies and actor endpoint
+    # ################################
 
     """
     DELETE /movies/<int:movie_id>
@@ -263,7 +265,9 @@ def create_app(test_config=None):
 
         return jsonify({"success": True, "deleted": actor_id})
 
-    ############################### PATCH movies and actor end point #############################
+    #################################
+    # PATCH movies and actor endpoint
+    # ###############################
 
     """
     PATCH /movies/<movie_id>
@@ -375,7 +379,9 @@ def create_app(test_config=None):
         except BaseException:
             return default_message
 
-    #################################### Error Handlingt #######################################
+    ################
+    # Error Handling
+    # ##############
 
     @app.errorhandler(422)
     def unprocessable(error):
