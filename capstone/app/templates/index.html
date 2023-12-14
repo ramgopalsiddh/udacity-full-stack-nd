@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Movie and Actor App</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+<body>
+
+    <h1>Movie and Actor App</h1>
+
+    <h2>Movies</h2>
+    <ul id="movies-list"></ul>
+
+    <h2>Actors</h2>
+    <ul id="actors-list"></ul>
+
+    <h2>Create Movie</h2>
+    <form id="create-movie-form">
+        <label for="create-movie-title">Title:</label>
+        <input type="text" id="create-movie-title" name="create-movie-title" required>
+
+        <label for="create-movie-release-date">Release Date:</label>
+        <input type="date" id="create-movie-release-date" name="create-movie-release-date" required>
+
+        <button type="button" onclick="createMovie()">Create Movie</button>
+    </form>
+
+    <h2>Create Actor</h2>
+    <form id="create-actor-form">
+        <label for="create-actor-name">Name:</label>
+        <input type="text" id="create-actor-name" name="create-actor-name" required>
+
+        <label for="create-actor-age">Age:</label>
+        <input type="number" id="create-actor-age" name="create-actor-age" required>
+
+        <label for="create-actor-gender">Gender:</label>
+        <select id="create-actor-gender" name="create-actor-gender" required>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="M">Male</option>
+
+        </select>
+
+        <label for="create-actor-movie-id">Movie ID:</label>
+        <input type="number" id="create-actor-movie-id" name="create-actor-movie-id" required>
+
+        <button type="button" onclick="createActor()">Create Actor</button>
+    </form>
+
+    <p id="error-message"></p>
+
+    <!-- Modal for confirmation -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to delete this?</p>
+            <button onclick="confirmDelete()">Yes</button>
+            <button onclick="cancelDelete()">No</button>
+        </div>
+    </div>
+
+    <!-- Modal for details -->
+    <div id="details-modal" class="details-modal">
+        <div class="details-modal-content">
+            <span class="close-button" onclick="closeDetailsModal()">&times;</span>
+            <h2 id="details-title"></h2>
+            <p><strong>Release Date:</strong> <span id="details-release-date"></span></p>
+            <h3>Actors</h3>
+            <ul id="details-actors"></ul>
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loading-spinner">
+        Loading...
+    </div>
+    
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
