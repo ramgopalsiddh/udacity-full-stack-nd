@@ -1,16 +1,14 @@
-/* Add your CSS styles here */
 
 body {
     font-family: 'Arial', sans-serif;
-    margin: 20px;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+    align-items: center;
 }
 
 h1 {
-    color: #333;
-}
-
-h2 {
-    color: #555;
+    color: #343a40;
 }
 
 ul {
@@ -19,94 +17,70 @@ ul {
 }
 
 li {
-    margin-bottom: 10px;
-}
-
-form {
-    margin-top: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-input, select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
+    background-color: #ffffff;
+    margin-bottom: 20px;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
     border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+li:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+a {
+    color: #121212;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #dee8f3;
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    background-color: #007bff;
+    padding: 20px;
+    color: #fff;
     text-align: center;
 }
 
-.details-modal {
-    display: none;
+.footer {
+    background-color: #343a40;
+    padding: 10px;
+    color: #fff;
+    text-align: center;
 }
 
-.details-modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 60%;
-    border-radius: 8px;
-    text-align: left;
-}
-
-.close-button {
-    background-color: #f44336;
-    color: white;
-    padding: 8px 12px;
+.button {
+    background-color: #e0e5ea;
+    color: #0d0d0c;
+    padding: 15px 30px;
     border: none;
-    border-radius: 5px;
+    border-radius: 20px;
     cursor: pointer;
-    float: right;
-    margin-bottom: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease-in-out;
+    width: 300px;
+    height: 35px;
+    font-size: 1.5em;
 }
 
-.close-button:hover {
-    background-color: #d32f2f;
+.button:hover {
+    background-color: #958f1e;
 }
 
-#loading-spinner {
-    display: none;
-}
-
-#error-message {
-    color: red;
-    margin-top: 10px;
-}
+  span.emoji {
+    font-size: 40px;
+    vertical-align: middle;
+    line-height: 1;
+    margin-left: 5px;
+  }
