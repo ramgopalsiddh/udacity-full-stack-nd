@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Movie List</title>
+</head>
+<body>
+    <h1>Movies</h1>
+    <ul>
+        {% for movie in movies %}
+            <li> ( ID: {{ movie.id }}, Name: {{ movie.title }}, Released: {{ movie.release_date }}), (Actor ID: {{ movie.actors }} ) </li>
+        {% endfor %}
+    </ul>
+    <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+</body>
+</html>
