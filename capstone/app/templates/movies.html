@@ -8,11 +8,31 @@
 </head>
 <body>
     <h1>Movies</h1>
-    <ul>
-        {% for movie in movies %}
-            <li> ( ID: {{ movie.id }}, Name: {{ movie.title }}, Released: {{ movie.release_date }}), (Actor ID: {{ movie.actors }} ) </li>
-        {% endfor %}
-    </ul>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Release Date</th>
+                <th>Actor IDs</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movie in movies | sort(attribute='release_date') %}
+                <tr>
+                    <td>{{ movie.id }}</td>
+                    <td>{{ movie.title }}</td>
+                    <td>{{ movie.release_date }}</td>
+                    <td>
+                        {% for actor in movie.actors %}
+                            {{ actor.id }}
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
 </html>
