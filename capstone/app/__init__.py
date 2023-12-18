@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from models import setup_db, Movie, Actor
 from flask_migrate import Migrate
 import os
 
@@ -81,10 +82,53 @@ def movies():
     movies_data = Movie.query.all()
     return render_template("movies.html", movies=movies_data)
 
+# Route for displaying actors
 @app.route("/actors")
 def actors():
     actors_data = Actor.query.all()
     return render_template("actors.html", actors=actors_data)
+
+
+
+@app.route('/create_movie_form')
+def create_movie_form():
+    actors_data = Actor.query.all()
+    return render_template('create_movie_form.html', actors=actors_data)
+
+# Route for handling the submission of the "Create Movie" form
+@app.route('/create_movie', methods=['POST'])
+def create_movie():
+    title = request.form.get('title')
+    release_date = request.form.get('release_date')
+    actor_ids = request.form.getlist('actors')
+
+    new_movie = Movie(title=title, release_date=release_date)
+    for actor_id in actor_ids:
+        actor = Actor.query.get(actor_id)
+        if actor:
+            new_movie.actors.append(actor)
+
+    new_movie.insert()
+
+    return redirect(url_for('index'))  # Redirect to the homepage or wherever you want
+
+# Route for displaying the "Create Actor" form
+@app.route('/create_actor_form')
+def create_actor_form():
+    return render_template('create_actor_form.html')
+
+# Route for handling the submission of the "Create Actor" form
+@app.route('/create_actor', methods=['POST'])
+def create_actor():
+    name = request.form.get('name')
+    age = request.form.get('age')
+    gender = request.form.get('gender')
+    movie_id = request.form.get('movie_id')
+
+    new_actor = Actor(name=name, age=age, gender=gender, movie_id=movie_id)
+    new_actor.insert()
+
+    return redirect(url_for('index'))  # Redirect to the homepage or wherever you want
 
 if __name__ == "__main__":
     app.run()
