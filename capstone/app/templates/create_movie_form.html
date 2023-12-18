@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Create Movie</title>
+</head>
+<body>
+    <h1>Create Movie</h1>
+    <form action="{{ url_for('create_movie') }}" method="post">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="release_date">Release Date:</label>
+        <input type="date" id="release_date" name="release_date" required>
+
+        <label for="actors">Actors:</label>
+        <select id="actors" name="actors" multiple>
+            {% for actor in actors %}
+                <option value="{{ actor.id }}">{{ actor.name }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="submit" value="Create Movie">
+    </form>
+    <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+</body>
+</html>
