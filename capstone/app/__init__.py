@@ -130,6 +130,66 @@ def create_actor():
 
     return redirect(url_for('index'))  # Redirect to the homepage or wherever you want
 
+@app.route("/edit_movie_form/<int:movie_id>")
+def edit_movie_form(movie_id):
+    movie = Movie.query.get(movie_id)
+    actors = Actor.query.all()
+    selected_actors = [actor.id for actor in movie.actors]
+    return render_template("edit_movie_form.html", movie=movie, actors=actors, selected_actors=selected_actors)
+
+@app.route("/edit_movie/<int:movie_id>", methods=["POST"])
+def edit_movie(movie_id):
+    movie = Movie.query.get(movie_id)
+    if movie:
+        title = request.form.get("title")
+        release_date = request.form.get("release_date")
+        actors_ids = request.form.getlist("actors")
+
+        movie.title = title
+        movie.release_date = release_date
+        movie.actors = Actor.query.filter(Actor.id.in_(actors_ids)).all()
+
+        movie.update()
+
+    return redirect(url_for("movies"))
+
+@app.route("/edit_actor_form/<int:actor_id>")
+def edit_actor_form(actor_id):
+    actor = Actor.query.get(actor_id)
+    return render_template("edit_actor_form.html", actor=actor)
+
+@app.route("/edit_actor/<int:actor_id>", methods=["POST"])
+def edit_actor(actor_id):
+    actor = Actor.query.get(actor_id)
+    if actor:
+        name = request.form.get("name")
+        age = request.form.get("age")
+        gender = request.form.get("gender")
+        movie_id = request.form.get("movie_id")
+
+        actor.name = name
+        actor.age = age
+        actor.gender = gender
+        actor.movie_id = movie_id
+
+        actor.update()
+
+    return redirect(url_for("actors"))
+
+@app.route('/delete_movie/<int:movie_id>', methods=['POST'])
+def delete_movie(movie_id):
+    movie = Movie.query.get(movie_id)
+    if movie:
+        movie.delete()
+    return redirect(url_for('movies'))  # Redirect to the movies page or home page
+
+@app.route('/delete_actor/<int:actor_id>', methods=['POST'])
+def delete_actor(actor_id):
+    actor = Actor.query.get(actor_id)
+    if actor:
+        actor.delete()
+    return redirect(url_for('actors'))  # Redirect to the actors page or home page
+
 if __name__ == "__main__":
     app.run()
 
