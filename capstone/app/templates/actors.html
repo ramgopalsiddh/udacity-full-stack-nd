@@ -16,6 +16,9 @@
                 <th>Age</th>
                 <th>Gender</th>
                 <th>Movie ID</th>
+                <th>Edit Actor ✏️ </th>
+                <th>Delete Actor ❌</th>
+
             </tr>
         </thead>
         <tbody>
@@ -26,6 +29,14 @@
                     <td>{{ actor.age }}</td>
                     <td>{{ actor.gender }}</td>
                     <td>{{ actor.movie_id }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_actor_form', actor_id=actor.id) }}"><button>Edit ✏️</button></a>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('delete_actor', actor_id=actor.id) }}" method="post">
+                            <button type="submit">Delete ⛔</button>
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
