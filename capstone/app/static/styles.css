@@ -71,10 +71,47 @@ a:hover {
     height: 35px;
     font-size: 1.5em;
     align-items: center;
+    margin-right: 20px;
 }
 
 .button:hover {
     background-color: #958f1e;
+}
+
+.button_logout{
+    background-color: rgb(202, 31, 31);
+    color: #0d0d0c;
+    padding: 20px 30px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease-in-out;
+    width: 300px;
+    height: 35px;
+    font-size: 1.5em;
+    align-items: center;
+    margin-right: 50px;
+}
+
+.button_login{
+    background-color: rgb(13, 200, 6);
+    color: #0d0d0c;
+    padding: 20px 30px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease-in-out;
+    width: 300px;
+    height: 60 px;
+    font-size: 1.5em;
+    align-items: center;
+    margin-right: 50px;
 }
 
   span.emoji {
