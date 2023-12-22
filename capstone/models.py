@@ -1,49 +1,30 @@
-import os
-from sqlalchemy import ForeignKey, Column, String, Integer, DateTime, create_engine
-from sqlalchemy.orm import relationship
+# models.py
 from flask_sqlalchemy import SQLAlchemy
-import json
-from flask_migrate import Migrate
+import os
 
-# Database setup
-
-# database_name = "capstone"
-# database_path = "postgres://{}/{}".format('localhost:5432', database_name)
-# database_path = "postgres:///{}".format(database_name)
 database_path = os.getenv("DATABASE_URL")
 db = SQLAlchemy()
 
+class Config:
+    SQLALCHEMY_DATABASE_URI = "postgresql://ram@localhost:5432/capstone"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
 """
-setup_db(app)
-    binds a flask application and a SQLAlchemy service
+Movie Model
 """
-
-
-def setup_db(app, database_path=database_path):
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://ram@localhost:5432/capstone"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    db.app = app
-    db.init_app(app)
-    migrate = Migrate(app, db)
-
-
-## Movie auth setup
-"""
-Movie
-"""
-
 
 class Movie(db.Model):
     __tablename__ = "movies"
 
-    id = Column(Integer, primary_key=True)
-    title = Column(String)
-    release_date = Column(DateTime)
-    actors = relationship("Actor", backref="movie", lazy=True)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    release_date = db.Column(db.DateTime)
+    actors = db.relationship("Actor", backref="movie", lazy=True)
 
     def __init__(self, title, release_date):
-        self.title = title
-        self.release_date = release_date
+            self.title = title
+            self.release_date = release_date
 
     def insert(self):
         db.session.add(self)
@@ -64,21 +45,18 @@ class Movie(db.Model):
             "actors": list(map(lambda actor: actor.format(), self.actors)),
         }
 
-
-# Actor auth setup
 """
-Actor
+Actor's Model
 """
-
 
 class Actor(db.Model):
     __tablename__ = "actors"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
-    gender = Column(String)
-    movie_id = Column(Integer, ForeignKey("movies.id"), nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String)
+    movie_id = db.Column(db.Integer, db.ForeignKey("movies.id"), nullable=True)
 
     def __init__(self, name, age, gender, movie_id):
         self.name = name
