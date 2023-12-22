@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, make_response
 from flask_sqlalchemy import SQLAlchemy
 from models import setup_db, Movie, Actor
 from flask_migrate import Migrate
+from auth.auth import requires_auth, AuthError
 import os
+import secrets
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = secrets.token_hex(16)
 
 # Configure database
 database_path = os.getenv("DATABASE_URL")
@@ -73,7 +78,21 @@ class Actor(db.Model):
 
 
 # Routes
-@app.route("/")
+@app.route('/')
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+# logout 
+@app.route('/logout')
+def logout():
+    # Clear the session and any other user-related data
+    session.clear()
+    # Redirect to the Auth0 logout URL
+    return redirect('https://ramgopalsiddh.us.auth0.com/logout?client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y&returnTo=' + url_for('login', _external=True))
+
+
+@app.route("/index")
 def index():
     return render_template("index.html")
 
