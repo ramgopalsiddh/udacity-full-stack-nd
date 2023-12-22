@@ -7,6 +7,10 @@
     <title>Movie Database</title>
 </head>
 <body>
+
+    <!-- logout button -->
+    <a class="button_logout" href="{{ url_for('logout') }}">Logout</a>
+
     <h1>Welcome to the Movie Database</h1>
     <p class="button"><a href="{{ url_for('movies') }}">View Movies<span class="emoji">📽</span></a></p>
     <p class="button"><a href="{{ url_for('actors') }}">View Actors <span class="emoji">🧑🎭</span></a></p>
