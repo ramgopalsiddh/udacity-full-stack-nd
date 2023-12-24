@@ -165,26 +165,32 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    
 }
 
 table, th, td {
     border: 2px solid #0b0b0c;
+    
 }
 
 th {
     padding: 15px;
     text-align: left;
+    color: #0b0c0c;
+    background-color: #709996;
 } 
 
 td {
-    padding: 4px;
+    padding: 8px;
     text-align: left;
 }
 
 thead {
-    background-color: #42477a;
-    color: #fff;
+    /* mangae table data style  */
+    background-color: #f4eeee;  
+    color: #111010;
 }
+
 
 tbody tr:nth-child(even) {
     background-color: #f8f9fa;
