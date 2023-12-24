@@ -1,48 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Movie List</title>
 </head>
+
 <body>
-    <h1>Movies</h1>
-    <table border="1">
+    <script>
+        // Function to fetch JSON data asynchronously
+        async function fetchData() {
+            const token = sessionStorage.getItem("auth_token")
+            const response = await fetch('/movies', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            const jsonData = await response.json();
+            console.log("Response => ", jsonData);
+
+            return jsonData;
+        }
+
+        // Function to join actors array into a comma-separated string
+        function joinActors(actors) {
+            return actors.map(actor => actor.name).join(', ');
+        }
+
+        // Function to build and display the table
+        async function buildTable() {
+            try {
+                const jsonData = await fetchData();
+                const table = document.getElementById("movies");
+                // Create data rows
+                jsonData.movies.forEach(movie => {
+                    const row = table.insertRow();
+                    // for (const key in movie) {
+                    const id = row.insertCell()
+                    id.textContent = movie.id
+
+                    const title = row.insertCell()
+                    title.textContent = movie.title
+
+                    const actors = row.insertCell()
+                    actors.textContent = joinActors(movie.actors)
+
+                    const rd = row.insertCell()
+                    rd.textContent = movie.release_date
+
+                    //Edit Movies buttons
+                    const editCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit ✏️';
+                    editButton.addEventListener('click', () => editPage(movie.id));
+                    editCell.appendChild(editButton);
+
+                    async function editPage(movie_id) {
+                        window.location.pathname = ("/edit_movie_form/" + movie_id) // forward to edit movies route
+                    }
+
+                    //Delete movies button 
+                    const deleteCell = row.insertCell();
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete ⛔';
+                    deleteButton.addEventListener('click', () => deleteMovie(movie.id));
+                    deleteCell.appendChild(deleteButton);
+
+                    // Function to handle delete movie route
+                    async function deleteMovie(movieId) {
+                        if (confirm('Are you sure you want to delete this movie?')) {
+                            try {
+                                const token = sessionStorage.getItem("auth_token");
+                                const response = await fetch(`/delete_movie/${movieId}`, {
+                                    method: 'POST',  // Change to DELETE method if your server supports it
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                    },
+                                });
+                                // check responce of button
+                                if (response.ok) {
+                                    alert('Movie deleted successfully');
+                                    // Refresh the page after a short delay
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 500);
+                                } else {
+                                    alert('Error deleting movie. Please try again.');
+                                }
+                            } catch (error) {
+                                console.error('Error deleting movie:', error);
+                            }
+                        }
+                    }
+                });
+
+                document.body.appendChild(table);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        // Call the function to build the table
+        buildTable();
+        // document.getElementById('getMoviesButton').addEventListener('click', buildTable());
+    </script>
+    <h1>Movies List</h1>
+    <table id="movies" border="1">
+        <!-- build table header for table -->
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Title</th>
+                <th>Actors</th>
                 <th>Release Date</th>
-                <th>Actor IDs</th>
                 <th>Edit Movie ✏️ </th>
                 <th>delete Movie ❌</th>
             </tr>
         </thead>
-        <tbody>
-            {% for movie in movies | sort(attribute='release_date') %}
-                <tr>
-                    <td>{{ movie.id }}</td>
-                    <td>{{ movie.title }}</td>
-                    <td>{{ movie.release_date }}</td>
-                    <td>
-                        {% for actor in movie.actors %}
-                            {{ actor.id }}
-                            {% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('edit_movie_form', movie_id=movie.id) }}"><button>Edit ✏️</button></a>
-                    </td>
-                    <td>
-                        <form action="{{ url_for('delete_movie', movie_id=movie.id) }}" method="post">
-                            <button type="submit">Delete ⛔</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
     </table>
     <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
+
 </html>
