@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Movie Database</title>
 </head>
+
 <body>
 
     <!-- logout button -->
@@ -16,5 +18,31 @@
     <p class="button"><a href="{{ url_for('actors') }}">View Actors <span class="emoji">🧑🎭</span></a></p>
     <p class="button"><a href="{{ url_for('create_movie_form') }}">Create Movie<span class="emoji">➕ 📽</span></a></p>
     <p class="button"><a href="{{ url_for('create_actor_form') }}">Create Actor<span class="emoji">➕ 🧑🎭</span></a></p>
+
+    <script>
+        // Function to parse hash parameters
+        function getParameterByName(name, hash) {
+            name = name.replace(/[\[\]]/g, "\\$&");
+            const regex = new RegExp("[#&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(hash);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        url = window.location.hash
+
+        // Parse values
+        const accessToken = getParameterByName('access_token', url);
+        if (accessToken != null && accessToken != '') {
+            console.log('Access Token:', accessToken);
+            console.log("saving token to cookies...")
+            const expiresInSeconds = 86400; // 24 hours
+            const expirationDate = new Date(Date.now() + expiresInSeconds * 1000).toUTCString();
+            document.cookie = `auth_token=${accessToken}; expires=${expirationDate}; path=/`;
+        }
+
+    </script>
 </body>
+
 </html>
