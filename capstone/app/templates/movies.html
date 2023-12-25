@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Movie List</title>
+    <!-- Add for SweetAlert2 for show  custom aleart  -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 
 <body>
@@ -19,6 +21,14 @@
         // Function to fetch JSON data asynchronously
         async function fetchData() {
             const token = getCookie("auth_token");
+
+            // check for token Available if not to show errer
+            if (!token) {
+                // Show an error message or take appropriate action
+                showError("Authentication token not found. Please log in.");
+                return null;
+            }
+
             const response = await fetch('/movies', {
                 method: 'GET',
                 headers: {
@@ -31,6 +41,21 @@
             console.log("Response => ", jsonData);
 
             return jsonData;
+        }
+
+        // Function to show an error message using SweetAlert2 when user is logout
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                showCancelButton: true,
+                confirmButtonText: 'Go to Login', // button for redirect user to login page
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ url_for('login') }}"
+                }
+            })
         }
 
         // Function to join actors array into a comma-separated string
@@ -91,7 +116,7 @@
                                 // check responce of button
                                 if (response.ok) {
                                     alert('Movie deleted successfully');
-                                    // Refresh the page after a short delay
+                                    // Refresh the page after a short delay for rerender table after delete movie
                                     setTimeout(() => {
                                         location.reload();
                                     }, 500);
