@@ -1,29 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Edit Movie</title>
 </head>
+
 <body>
     <h1>Edit Movie</h1>
-    <form action="{{ url_for('edit_movie', movie_id=movie.id) }}" method="post">
+
+    <!-- Form for editing movie data -->
+    <form id="editForm">
         <label for="title">Title:</label>
-        <input type="text" id="title" name="title" value="{{ movie.title }}" required>
+        <input type="text" id="title" name="title" required>
 
         <label for="release_date">Release Date:</label>
-        <input type="date" id="release_date" name="release_date" value="{{ movie.release_date }}" required>
+        <input type="date" id="release_date" name="release_date" required>
 
         <label for="actors">Actors:</label>
         <select id="actors" name="actors" multiple>
-            {% for actor in actors %}
-                <option value="{{ actor.id }}" {% if actor.id in selected_actors %}selected{% endif %}>{{ actor.name }}</option>
-            {% endfor %}
+            <!-- Options will be added dynamically using JavaScript -->
         </select>
 
         <input type="submit" value="Save Changes">
     </form>
-    <p class="button"><a href="{{ url_for('movies') }}">Go back to Movies <span class="emoji">📽</span></a></p>
+
+    <!-- JavaScript to populate form fields and handle form submission -->
+    <!-- TODO: get moviedata via JSON endpoints that's protected by auth, 
+        otherwise you are leaking data -->
+    <script>
+        // Get the movie data passed from the Flask route
+        const movieData = {{ movie | tojson | safe }};
+
+        // Fetch all actor names from the server
+        async function fetchActorNames() {
+            try {
+                const response = await fetch('/actorsdata');  // Replace with your actual route
+                const actorData = await response.json();
+                return actorData.actors.map(actor => ({ id: actor.id, name: actor.name }));
+            } catch (error) {
+                console.error('Error fetching actor names:', error);
+                return [];
+            }
+        }
+
+        // Populate form fields with movie data and actor names
+        async function populateForm() {
+            document.getElementById('title').value = movieData.title;
+            const formattedDate = new Date(movieData.release_date).toISOString().split('T')[0];
+            document.getElementById('release_date').value = formattedDate;
+
+            const actorsDropdown = document.getElementById('actors');
+            const allActors = await fetchActorNames();
+
+            allActors.forEach(actor => {
+                const option = document.createElement('option');
+                option.value = actor.id;
+                option.text = actor.name;
+                actorsDropdown.appendChild(option);
+            });
+
+            // Set the selected actors based on the movie data
+            movieData.actors.forEach(actorId => {
+                const option = actorsDropdown.querySelector(`option[value="${actorId}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+        }
+
+        // Form submission handler
+        document.getElementById('editForm').onsubmit = async function (event) {
+            event.preventDefault();
+
+            // Retrieve updated form data
+            const updatedData = {
+                title: document.getElementById('title').value,
+                release_date: document.getElementById('release_date').value,
+                actors: Array.from(document.getElementById('actors').selectedOptions).map(option => option.value)
+            };
+            function getCookie(auth_token) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${auth_token}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+
+            try {
+                const token = getCookie("auth_token");
+                // check for token Available if not to show errer
+                if (!token) {
+                    // Show an error message or take appropriate action
+                    showError("Authentication token not found. Please log in.");
+                    return null;
+                }
+
+                // Make a request to update the movie data with updatedData
+                const response = await fetch(`/edit_movie/${movieData.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (response.ok) {
+                    // Handle success (redirect, refresh, etc.)
+                    window.location.href = "{{ url_for('view_movies') }}";
+                } else {
+                    // extract error message from response
+                    var msg = "Error updating movie"
+                    // use await because we get a promise
+                    const errorJson = await response.json();
+                    console.log(errorJson)
+                    if (errorJson.code != null) {
+                        msg = `${msg}: ${errorJson.code}`;
+                    }
+                    if (errorJson.description != null) {
+                        msg = `${msg}: ${errorJson.description}`;
+                    }
+                    alert(msg);
+                }
+            } catch (error) {
+                console.error('Error updating movie:', error);
+            }
+        };
+
+        // Call the function to populate the form
+        populateForm();
+    </script>
+
+    <!-- Go back link -->
+    <p class="button"><a href="{{ url_for('view_movies') }}">Go back to Movies 📽</a></p>
 </body>
+
 </html>
