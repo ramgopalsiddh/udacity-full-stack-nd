@@ -1,12 +1,28 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    session,
+    make_response,
+)
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import db, Config, Movie, Actor
 from flask_migrate import Migrate
-from auth.auth import requires_auth
+from auth.auth import requires_auth, AuthError
 import secrets
+import requests
 
 migrate = Migrate()
+
+
+class NotFoundError(Exception):
+    def __init__(self):
+        self.error = "not found"
+        self.status_code = 404
 
 
 def create_app(test_config=None):
@@ -46,10 +62,15 @@ def create_app(test_config=None):
         # Clear the session and any other user-related data
         session.clear()
         # Redirect to the Auth0 logout URL
-        return redirect(
-            "https://ramgopalsiddh.us.auth0.com/logout?client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y&returnTo="
-            + url_for("login", _external=True)
+        response = make_response(
+            redirect(
+                "https://ramgopalsiddh.us.auth0.com/logout?client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y&returnTo="
+                + url_for("login", _external=True)
+            )
         )
+        response.delete_cookie("auth_token")
+
+        return response
 
     @app.route("/index")
     def index():
@@ -73,6 +94,13 @@ def create_app(test_config=None):
     def actors():
         actors_data = Actor.query.all()
         return render_template("actors.html", actors=actors_data)
+
+    # this Route access acters data in json format
+    @app.route("/actorsdata", methods=["GET"])
+    def actorsdata():
+        actors = Actor.query.all()
+        actors = list(map(lambda movie: movie.format(), actors))
+        return jsonify({"success": True, "actors": actors})
 
     @app.route("/create_movie_form")
     def create_movie_form():
@@ -118,54 +146,70 @@ def create_app(test_config=None):
             url_for("index")
         )  # Redirect to the homepage or wherever you want
 
-    @app.route("/edit_movie_form/<int:movie_id>", methods=["GET"])
-    # @requires_auth("update:movies")
-    def edit_movie_form(movie_id):
-        # movie = Movie.query.get(movie_id)
-        # actors = Actor.query.all()
-        # selected_actors = [actor.id for actor in movie.actors]
-        return render_template("edit_movie_form.html")
+    @app.route("/edit_movie_formdata/<int:movie_id>", methods=["GET"])
+    # @requires_auth("view:movies")
+    def edit_movie_formdata(movie_id):
+        movie = Movie.query.get(movie_id)
+        if not movie:
+            raise NotFoundError
 
-    #     return jsonify({
-    #         'movie': {
-    #             'id': movie.id,
-    #             'title': movie.title,
-    #             'release_date': str(movie.release_date),
-    #             'actors': [{'id': actor.id, 'name': actor.name} for actor in movie.actors]
-    #         }
-    # })
+        # return jsonify return json data in "/edit_movie_form/<int:movie_id>" Route
+        return jsonify(
+            {
+                "movie": {
+                    "id": movie.id,
+                    "title": movie.title,
+                    "release_date": str(movie.release_date),
+                    "actors": [
+                        {"id": actor.id, "name": actor.name} for actor in movie.actors
+                    ],
+                }
+            }
+        )
+
+    # this Route (displays JSON data in HTML)
+    @app.route("/edit_movie_form/<int:movie_id>", methods=["GET"])
+    def edit_movie_form(movie_id):
+        # Access data from the first route using the requests module
+        response = requests.get(f"http://localhost:5000/edit_movie_formdata/{movie_id}")
+        json_data = response.json()
+
+        print(json_data)
+
+        # Render an HTML template with the JSON data
+        return render_template("edit_movie_form.html", movie=json_data["movie"])
 
     @app.route("/edit_movie/<int:movie_id>", methods=["POST"])
-    def edit_movie(movie_id):
+    @requires_auth("update:movies")
+    def edit_movie(payload, movie_id):
         movie = Movie.query.get(movie_id)
-        if movie:
-            title = request.form.get("title")
-            release_date = request.form.get("release_date")
-            actors_ids = request.form.getlist("actors")
+        if not movie:
+            raise NotFoundError
 
-            movie.title = title
-            movie.release_date = release_date
-            movie.actors = Actor.query.filter(Actor.id.in_(actors_ids)).all()
+        data = request.json  # Use request.json to parse JSON data
+        title = data.get("title")
+        release_date = data.get("release_date")
+        actors_ids = data.get("actors")
+        movie.title = title
+        movie.release_date = release_date
+        movie.actors = Actor.query.filter(Actor.id.in_(actors_ids)).all()
 
-            movie.update()
+        movie.update()
 
-            # Include the updated movie details in the response
-            return jsonify(
-                {
-                    "message": "Movie updated successfully",
-                    "movie": {
-                        "id": movie.id,
-                        "title": movie.title,
-                        "release_date": movie.release_date,
-                        "actors": [
-                            {"id": actor.id, "name": actor.name}
-                            for actor in movie.actors
-                        ],
-                    },
-                }
-            )
-
-        return jsonify({"error": "Movie not found"}), 404
+        # Include the updated movie details in the response
+        return jsonify(
+            {
+                "message": "Movie updated successfully",
+                "movie": {
+                    "id": movie.id,
+                    "title": movie.title,
+                    "release_date": movie.release_date,
+                    "actors": [
+                        {"id": actor.id, "name": actor.name} for actor in movie.actors
+                    ],
+                },
+            }
+        )
 
     @app.route("/edit_actor_form/<int:actor_id>")
     def edit_actor_form(actor_id):
@@ -206,6 +250,18 @@ def create_app(test_config=None):
         if actor:
             actor.delete()
         return redirect(url_for("actors"))  # Redirect to the actors page or home page
+
+    @app.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
+
+    @app.errorhandler(NotFoundError)
+    def handle_not_found_error(ex):
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
 
     return app
 
