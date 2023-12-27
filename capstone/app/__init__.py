@@ -79,7 +79,7 @@ def create_app(test_config=None):
     @app.route("/movies", methods=["GET"])
     @requires_auth("view:movies")
     def movies(payload):
-        movies = Movie.query.all()
+        movies = Movie.query.order_by(Movie.id).all()
         movies = list(map(lambda movie: movie.format(), movies))
         return jsonify({"success": True, "movies": movies})
         # movies_data = Movie.query.all()
@@ -94,13 +94,6 @@ def create_app(test_config=None):
     def actors():
         actors_data = Actor.query.all()
         return render_template("actors.html", actors=actors_data)
-
-    # this Route access acters data in json format
-    @app.route("/actorsdata", methods=["GET"])
-    def actorsdata():
-        actors = Actor.query.all()
-        actors = list(map(lambda movie: movie.format(), actors))
-        return jsonify({"success": True, "actors": actors})
 
     @app.route("/create_movie_form")
     def create_movie_form():
@@ -146,11 +139,15 @@ def create_app(test_config=None):
             url_for("index")
         )  # Redirect to the homepage or wherever you want
 
-    @app.route("/edit_movie_formdata/<int:movie_id>", methods=["GET"])
-    # @requires_auth("view:movies")
-    def edit_movie_formdata(movie_id):
+    @app.route("/get_movie_data/<int:movie_id>", methods=["GET"])
+    @requires_auth("view:movies")
+    def get_movie_data(payload, movie_id):
         movie = Movie.query.get(movie_id)
         if not movie:
+            raise NotFoundError
+
+        actors = Actor.query.all()
+        if not actors:
             raise NotFoundError
 
         # return jsonify return json data in "/edit_movie_form/<int:movie_id>" Route
@@ -163,21 +160,16 @@ def create_app(test_config=None):
                     "actors": [
                         {"id": actor.id, "name": actor.name} for actor in movie.actors
                     ],
-                }
+                },
+                "actors": list(map(lambda movie: movie.format(), actors)),
             }
         )
 
-    # this Route (displays JSON data in HTML)
+    # render edit movie template
     @app.route("/edit_movie_form/<int:movie_id>", methods=["GET"])
     def edit_movie_form(movie_id):
-        # Access data from the first route using the requests module
-        response = requests.get(f"http://localhost:5000/edit_movie_formdata/{movie_id}")
-        json_data = response.json()
-
-        print(json_data)
-
         # Render an HTML template with the JSON data
-        return render_template("edit_movie_form.html", movie=json_data["movie"])
+        return render_template("edit_movie_form.html", movie_id=movie_id)
 
     @app.route("/edit_movie/<int:movie_id>", methods=["POST"])
     @requires_auth("update:movies")
