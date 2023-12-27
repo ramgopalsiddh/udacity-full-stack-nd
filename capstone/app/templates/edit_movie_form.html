@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Add for SweetAlert2 for show  custom aleart  -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <title>Edit Movie</title>
 </head>
 
@@ -12,7 +14,7 @@
     <h1>Edit Movie</h1>
 
     <!-- Form for editing movie data -->
-    <form id="editForm">
+    <form id="editForm" data-movieid="{{ movie_id }}">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required>
 
@@ -31,29 +33,51 @@
     <!-- TODO: get moviedata via JSON endpoints that's protected by auth, 
         otherwise you are leaking data -->
     <script>
-        // Get the movie data passed from the Flask route
-        const movieData = {{ movie | tojson | safe }};
+        // Get the movie_id passed from the Flask route
+        var movie_id = document.getElementById('editForm').dataset.movieid;
+        // Log the value to the console (you can use it as needed)
+        console.log("Movie ID:", movie_id);
 
-        // Fetch all actor names from the server
-        async function fetchActorNames() {
-            try {
-                const response = await fetch('/actorsdata');  // Replace with your actual route
-                const actorData = await response.json();
-                return actorData.actors.map(actor => ({ id: actor.id, name: actor.name }));
-            } catch (error) {
-                console.error('Error fetching actor names:', error);
-                return [];
-            }
+        function getCookie(auth_token) {
+            const value = `; ${document.cookie} `;
+            const parts = value.split(`; ${auth_token}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
+        const token = getCookie("auth_token");
+        // check for token Available if not to show errer
+        if (!token) {
+            // Show an error message or take appropriate action
+            showError("Authentication token not found. Please log in.");
+        }
+
 
         // Populate form fields with movie data and actor names
         async function populateForm() {
+            // Make a request to update the movie data with updatedData
+            const response = await fetch(`/get_movie_data/${movie_id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token} `,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                alert("Error getting movie data...");
+            }
+
+            jsonData = await response.json()
+
+            console.log(jsonData)
+
+            movieData = jsonData.movie
+
             document.getElementById('title').value = movieData.title;
             const formattedDate = new Date(movieData.release_date).toISOString().split('T')[0];
             document.getElementById('release_date').value = formattedDate;
 
             const actorsDropdown = document.getElementById('actors');
-            const allActors = await fetchActorNames();
+            const allActors = jsonData.actors;
 
             allActors.forEach(actor => {
                 const option = document.createElement('option');
@@ -64,12 +88,15 @@
 
             // Set the selected actors based on the movie data
             movieData.actors.forEach(actorId => {
-                const option = actorsDropdown.querySelector(`option[value="${actorId}"]`);
+                const option = actorsDropdown.querySelector(`option[value = "${actorId}"]`);
                 if (option) {
                     option.selected = true;
                 }
             });
         }
+        // Call the function to populate the form
+        populateForm();
+
 
         // Form submission handler
         document.getElementById('editForm').onsubmit = async function (event) {
@@ -81,27 +108,13 @@
                 release_date: document.getElementById('release_date').value,
                 actors: Array.from(document.getElementById('actors').selectedOptions).map(option => option.value)
             };
-            function getCookie(auth_token) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${auth_token}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-            }
-
 
             try {
-                const token = getCookie("auth_token");
-                // check for token Available if not to show errer
-                if (!token) {
-                    // Show an error message or take appropriate action
-                    showError("Authentication token not found. Please log in.");
-                    return null;
-                }
-
                 // Make a request to update the movie data with updatedData
-                const response = await fetch(`/edit_movie/${movieData.id}`, {
+                const response = await fetch(`/edit_movie/${movie_id}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${token} `,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(updatedData)
@@ -117,7 +130,7 @@
                     const errorJson = await response.json();
                     console.log(errorJson)
                     if (errorJson.code != null) {
-                        msg = `${msg}: ${errorJson.code}`;
+                        msg = `${msg}: ${errorJson.code} `;
                     }
                     if (errorJson.description != null) {
                         msg = `${msg}: ${errorJson.description}`;
@@ -128,9 +141,6 @@
                 console.error('Error updating movie:', error);
             }
         };
-
-        // Call the function to populate the form
-        populateForm();
     </script>
 
     <!-- Go back link -->
