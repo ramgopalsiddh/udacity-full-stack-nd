@@ -53,7 +53,7 @@
                 confirmButtonText: 'Go to Login', // button for redirect user to login page
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "{{ url_for('login') }}"
+                    window.location.href = "{{ url_for('main') }}"
                 }
             })
         }
@@ -121,7 +121,18 @@
                                         location.reload();
                                     }, 500);
                                 } else {
-                                    alert('Error deleting movie. Please try again.');
+                                    // extract error message from response
+                                    var msg = "Error updating movie"
+                                    // use await because we get a promise
+                                    const errorJson = await response.json();
+                                    console.log(errorJson)
+                                    if (errorJson.code != null) {
+                                        msg = `${msg}: ${errorJson.code} `;
+                                    }
+                                    if (errorJson.description != null) {
+                                        msg = `${msg}: ${errorJson.description}`;
+                                    }
+                                    alert(msg);
                                 }
                             } catch (error) {
                                 console.error('Error deleting movie:', error);
@@ -153,7 +164,7 @@
             </tr>
         </thead>
     </table>
-    <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+    <p class="button"><a href="{{ url_for('main') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
 
 </html>
