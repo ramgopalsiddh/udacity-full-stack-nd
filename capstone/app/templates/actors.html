@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Actor List</title>
 </head>
+
 <body>
     <h1>Actors</h1>
     <table border="1">
@@ -15,32 +17,35 @@
                 <th>Name</th>
                 <th>Age</th>
                 <th>Gender</th>
-                <th>Movie ID</th>
+                <th>Movie Title</th>
+                <th>Movie IDs</th>
                 <th>Edit Actor ✏️ </th>
                 <th>Delete Actor ❌</th>
 
             </tr>
         </thead>
         <tbody>
-            {% for actor in actors | sort(attribute='id') %}
-                <tr>
-                    <td>{{ actor.id }}</td>
-                    <td>{{ actor.name }}</td>
-                    <td>{{ actor.age }}</td>
-                    <td>{{ actor.gender }}</td>
-                    <td>{{ actor.movie_id }}</td>
-                    <td>
-                        <a href="{{ url_for('edit_actor_form', actor_id=actor.id) }}"><button>Edit ✏️</button></a>
-                    </td>
-                    <td>
-                        <form action="{{ url_for('delete_actor', actor_id=actor.id) }}" method="post">
-                            <button type="submit">Delete ⛔</button>
-                        </form>
-                    </td>
-                </tr>
+            {% for actor in actors %}
+            <tr>
+                <td>{{ actor.id }}</td>
+                <td>{{ actor.name }}</td>
+                <td>{{ actor.age }}</td>
+                <td>{{ actor.gender }}</td>
+                <td>{{ actor.movies | map(attribute='title') | join(', ') }}</td>
+                <td>{{ actor.movies | map(attribute='id') | join(', ') }}</td>
+                <td>
+                    <a href="{{ url_for('edit_actor_form', actor_id=actor.id) }}"><button>Edit ✏️</button></a>
+                </td>
+                <td>
+                    <form action="{{ url_for('delete_actor', actor_id=actor.id) }}" method="post">
+                        <button type="submit">Delete ⛔</button>
+                    </form>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-    <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+    <p class="button"><a href="{{ url_for('main') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
+
 </html>
