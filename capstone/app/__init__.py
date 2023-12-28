@@ -8,13 +8,12 @@ from flask import (
     session,
     make_response,
 )
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import contains_eager
 from flask_cors import CORS
 from models import db, Config, Movie, Actor
 from flask_migrate import Migrate
 from auth.auth import requires_auth, AuthError
 import secrets
-import requests
 
 migrate = Migrate()
 
@@ -31,6 +30,7 @@ def create_app(test_config=None):
 
     # Configure database
     app.config.from_object(Config)
+    app.config["SQLALCHEMY_ECHO"] = True
 
     # Initialize SQLAlchemy with the app
     db.init_app(app)
@@ -52,9 +52,14 @@ def create_app(test_config=None):
 
     # Routes
     @app.route("/")
-    @app.route("/login")
-    def login():
-        return render_template("login.html")
+    def main():
+        auth_token = request.cookies.get("auth_token")
+        if auth_token:
+            # User is logged in
+            return render_template("index.html", logged_in=True)
+        else:
+            # User is logged out
+            return render_template("index.html", logged_in=False)
 
     # logout
     @app.route("/logout")
@@ -65,16 +70,12 @@ def create_app(test_config=None):
         response = make_response(
             redirect(
                 "https://ramgopalsiddh.us.auth0.com/logout?client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y&returnTo="
-                + url_for("login", _external=True)
+                + url_for("main", _external=True)
             )
         )
         response.delete_cookie("auth_token")
 
         return response
-
-    @app.route("/index")
-    def index():
-        return render_template("index.html")
 
     @app.route("/movies", methods=["GET"])
     @requires_auth("view:movies")
@@ -92,32 +93,44 @@ def create_app(test_config=None):
     # Route for displaying actors
     @app.route("/actors", methods=["GET"])
     def actors():
-        actors_data = Actor.query.all()
+        actors_data = (
+            Actor.query.outerjoin(Actor.movies)
+            .options(contains_eager(Actor.movies))
+            .order_by(Actor.id)
+            .all()
+        )
         return render_template("actors.html", actors=actors_data)
 
-    @app.route("/create_movie_form")
+    @app.route("/create_movie_form", methods=["GET"])
     def create_movie_form():
         actors_data = Actor.query.all()
         return render_template("create_movie_form.html", actors=actors_data)
 
     # Route for handling the submission of the "Create Movie" form
     @app.route("/create_movie", methods=["POST"])
-    def create_movie():
-        title = request.form.get("title")
-        release_date = request.form.get("release_date")
-        actor_ids = request.form.getlist("actors")
+    @requires_auth("post:movies")
+    def create_movie(payload):
+        try:
+            data = request.get_json()
 
-        new_movie = Movie(title=title, release_date=release_date)
-        for actor_id in actor_ids:
-            actor = Actor.query.get(actor_id)
-            if actor:
-                new_movie.actors.append(actor)
+            title = data.get("title")
+            release_date = data.get("release_date")
+            actor_ids = data.get("actors")
 
-        new_movie.insert()
+            if not title or not release_date:  # or not actor_ids:
+                return jsonify({"error": "Please fill out all required fields."}), 400
 
-        return redirect(
-            url_for("index")
-        )  # Redirect to the homepage or wherever you want
+            new_movie = Movie(title=title, release_date=release_date)
+            for actor_id in actor_ids:
+                actor = Actor.query.get(actor_id)
+                if actor:
+                    new_movie.actors.append(actor)
+
+            new_movie.insert()
+
+            return jsonify({"message": "Movie created successfully!"}), 201
+        except Exception as e:
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
     # Route for displaying the "Create Actor" form
     @app.route("/create_actor_form")
@@ -126,18 +139,48 @@ def create_app(test_config=None):
 
     # Route for handling the submission of the "Create Actor" form
     @app.route("/create_actor", methods=["POST"])
-    def create_actor():
-        name = request.form.get("name")
-        age = request.form.get("age")
-        gender = request.form.get("gender")
-        movie_id = request.form.get("movie_id")
+    @requires_auth("post:actors")
+    def create_actor(payload):
+        try:
+            data = request.get_json()
 
-        new_actor = Actor(name=name, age=age, gender=gender, movie_id=movie_id)
-        new_actor.insert()
+            name = data.get("name")
+            age = data.get("age")
+            gender = data.get("gender")
+            movie_ids = data.get("movie_ids")
 
-        return redirect(
-            url_for("index")
-        )  # Redirect to the homepage or wherever you want
+            if (
+                not name or not age or not gender or not movie_ids
+            ):  # Add more conditions if needed
+                return jsonify({"error": "Please fill out all required fields."}), 400
+
+            movie_ids_set = set([int(movie_id) for movie_id in movie_ids.split(",")])
+            # Query the movies with the specified IDs
+            movies = Movie.query.filter(Movie.id.in_(movie_ids_set)).all()
+
+            fetched_movie_ids_set = set([movie.id for movie in movies])
+
+            # Ensure that the lists are the same
+            if fetched_movie_ids_set == movie_ids_set:
+                pass
+                # print("The lists are the same.")
+            else:
+                # print("The lists are different.")
+                # Find the difference between the lists
+                difference = movie_ids_set - fetched_movie_ids_set
+                # print("Difference:", list(difference))
+                return jsonify(
+                    {"error": "Some movie ids are invalid: {}".format(difference)}
+                ), 400
+
+            new_actor = Actor(name=name, age=age, gender=gender)
+            new_actor.movies.extend(movies)
+
+            new_actor.insert()
+
+            return jsonify({"message": "Actor created successfully!"}), 201
+        except Exception as e:
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
     @app.route("/get_movie_data/<int:movie_id>", methods=["GET"])
     @requires_auth("view:movies")
@@ -164,6 +207,21 @@ def create_app(test_config=None):
                 "actors": list(map(lambda movie: movie.format(), actors)),
             }
         )
+
+    @app.route("/get_actors_data", methods=["GET"])
+    @requires_auth("view:actors")
+    def get_actors_data(payload):
+        try:
+            # Query all actors
+            actors = Actor.query.all()
+
+            # Convert actors to a list of dictionaries
+            actors_list = [{"id": actor.id, "name": actor.name} for actor in actors]
+
+            # Return the list of actors as JSON
+            return jsonify({"actors": actors_list})
+        except Exception as e:
+            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
     # render edit movie template
     @app.route("/edit_movie_form/<int:movie_id>", methods=["GET"])
@@ -206,7 +264,8 @@ def create_app(test_config=None):
     @app.route("/edit_actor_form/<int:actor_id>")
     def edit_actor_form(actor_id):
         actor = Actor.query.get(actor_id)
-        return render_template("edit_actor_form.html", actor=actor)
+        movie_ids = [movie.id for movie in actor.movies] if actor.movies else []
+        return render_template("edit_actor_form.html", actor=actor, movie_ids=movie_ids)
 
     @app.route("/edit_actor/<int:actor_id>", methods=["POST"])
     def edit_actor(actor_id):
@@ -215,12 +274,17 @@ def create_app(test_config=None):
             name = request.form.get("name")
             age = request.form.get("age")
             gender = request.form.get("gender")
-            movie_id = request.form.get("movie_id")
+            movie_ids = request.form.get(
+                "movie_ids"
+            )  # Assuming the input name is "movie_ids"
+
+            # Convert the comma-separated movie IDs to a list of integers
+            movie_ids = [int(movie_id.strip()) for movie_id in movie_ids.split(",")]
 
             actor.name = name
             actor.age = age
             actor.gender = gender
-            actor.movie_id = movie_id
+            actor.movies = Movie.query.filter(Movie.id.in_(movie_ids)).all()
 
             actor.update()
 
