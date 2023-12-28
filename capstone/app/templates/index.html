@@ -11,6 +11,10 @@
 <body>
 
     <!-- logout button -->
+    {% if logged_in == False %}
+    <h1>Please Login with Auth0 for View Movie Data </h1>
+    <a class="button_login" onclick="login()">Login with Auth0</a>
+    {% else %}
     <a class="button_logout" href="{{ url_for('logout') }}">Logout</a>
 
     <h1>Welcome to the Movie Database</h1>
@@ -19,7 +23,19 @@
     <p class="button"><a href="{{ url_for('create_movie_form') }}">Create Movie<span class="emoji">➕ 📽</span></a></p>
     <p class="button"><a href="{{ url_for('create_actor_form') }}">Create Actor<span class="emoji">➕ 🧑🎭</span></a></p>
 
+    {% endif %}
+
     <script>
+        // Auth0 Login Function
+        function login() {
+            // Redirect the user to the Auth0 login page
+            window.location.href = 'https://ramgopalsiddh.us.auth0.com/authorize' +
+                '?audience=capstone' +
+                '&response_type=token' +
+                '&client_id=nGfqDFBy34G83Nffy4CyajPMMb8hX31Y' +
+                '&redirect_uri=http://localhost:5000/';
+        }
+
         // Function to parse hash parameters
         function getParameterByName(name, hash) {
             name = name.replace(/[\[\]]/g, "\\$&");
@@ -30,16 +46,17 @@
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
 
-        url = window.location.hash
-
         // Parse values
-        const accessToken = getParameterByName('access_token', url);
+        const accessToken = getParameterByName('access_token', window.location.hash);
         if (accessToken != null && accessToken != '') {
             console.log('Access Token:', accessToken);
             console.log("saving token to cookies...")
             const expiresInSeconds = 86400; // 24 hours
             const expirationDate = new Date(Date.now() + expiresInSeconds * 1000).toUTCString();
             document.cookie = `auth_token=${accessToken}; expires=${expirationDate}; path=/`;
+            // clean the location hash and reload the page to render logout
+            window.location.hash = ""
+            location.reload()
         }
 
     </script>
