@@ -13,11 +13,11 @@
 <body>
     <script>
         // Function to get cookie value by name
-            function getCookie(auth_token) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${auth_token}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-            }
+        function getCookie(auth_token) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${auth_token}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
         // Function to fetch JSON data asynchronously
         async function fetchData() {
             const token = getCookie("auth_token");
@@ -140,8 +140,6 @@
                         }
                     }
                 });
-
-                document.body.appendChild(table);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
