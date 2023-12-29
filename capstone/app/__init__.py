@@ -8,7 +8,6 @@ from flask import (
     session,
     make_response,
 )
-from sqlalchemy.orm import contains_eager
 from flask_cors import CORS
 from models import db, Config, Movie, Actor
 from flask_migrate import Migrate
@@ -92,19 +91,20 @@ def create_app(test_config=None):
 
     # Route for displaying actors
     @app.route("/actors", methods=["GET"])
-    def actors():
-        actors_data = (
-            Actor.query.outerjoin(Actor.movies)
-            .options(contains_eager(Actor.movies))
-            .order_by(Actor.id)
-            .all()
-        )
-        return render_template("actors.html", actors=actors_data)
+    @requires_auth("view:actors")
+    def actors(payload):
+        actors = Actor.query.order_by(Actor.id).all()
+        actors = list(map(lambda actor: actor.format(), actors))
+        return jsonify({"success": True, "actors": actors})
+
+    @app.route("/view-actors", methods=["GET"])
+    def view_actors():
+        return render_template("actors.html")
 
     @app.route("/create_movie_form", methods=["GET"])
     def create_movie_form():
-        actors_data = Actor.query.all()
-        return render_template("create_movie_form.html", actors=actors_data)
+        # actors_data = Actor.query.all()
+        return render_template("create_movie_form.html")
 
     # Route for handling the submission of the "Create Movie" form
     @app.route("/create_movie", methods=["POST"])
@@ -208,6 +208,7 @@ def create_app(test_config=None):
             }
         )
 
+   # this use in edit movie form for populate all actors name
     @app.route("/get_actors_data", methods=["GET"])
     @requires_auth("view:actors")
     def get_actors_data(payload):
@@ -222,6 +223,35 @@ def create_app(test_config=None):
             return jsonify({"actors": actors_list})
         except Exception as e:
             return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+    # this use for print specfic actor's data in edit actor form
+    @app.route("/get_actor/<int:actor_id>", methods=["GET"])
+    @requires_auth("view:actors")
+    def get_actors(payload, actor_id):
+            # Query for get actor by id
+            actor = Actor.query.get(actor_id)
+            if not actor:
+                raise NotFoundError
+
+            movies = Movie.query.all()
+            if not movies:
+                raise NotFoundError
+            # return jsonify return json data in "/edit_movie_form/<int:movie_id>" Route
+            return jsonify(
+                {
+                    "actor": {
+                        "id" : actor.id,
+                        "name": actor.name,
+                        "age": actor.age,
+                        "gender": actor.gender,
+                        "movies": [
+                            {"id": movie.id, "title": movie.title} for movie in actor.movies
+                        ],
+                    },
+                    "movies": list(map(lambda actor: actor.format(), movies)),
+                }
+            )
+
 
     # render edit movie template
     @app.route("/edit_movie_form/<int:movie_id>", methods=["GET"])
@@ -263,32 +293,70 @@ def create_app(test_config=None):
 
     @app.route("/edit_actor_form/<int:actor_id>")
     def edit_actor_form(actor_id):
-        actor = Actor.query.get(actor_id)
-        movie_ids = [movie.id for movie in actor.movies] if actor.movies else []
-        return render_template("edit_actor_form.html", actor=actor, movie_ids=movie_ids)
+        # actor = Actor.query.get(actor_id)
+        # movie_ids = [movie.id for movie in actor.movies] if actor.movies else []
+        return render_template("edit_actor_form.html", actor_id=actor_id)
 
     @app.route("/edit_actor/<int:actor_id>", methods=["POST"])
-    def edit_actor(actor_id):
+    @requires_auth("update:actors")
+    def edit_actor(payload, actor_id):
         actor = Actor.query.get(actor_id)
-        if actor:
-            name = request.form.get("name")
-            age = request.form.get("age")
-            gender = request.form.get("gender")
-            movie_ids = request.form.get(
-                "movie_ids"
-            )  # Assuming the input name is "movie_ids"
+        if not actor:
+            raise NotFoundError
 
-            # Convert the comma-separated movie IDs to a list of integers
-            movie_ids = [int(movie_id.strip()) for movie_id in movie_ids.split(",")]
+        data = request.json  # Use request.json to parse JSON data
+        name = data.get("name")
+        age = data.get("age")
+        gender = data.get("gender")
+        movie_ids = data.get("movie_ids")
 
-            actor.name = name
-            actor.age = age
-            actor.gender = gender
-            actor.movies = Movie.query.filter(Movie.id.in_(movie_ids)).all()
+        if (
+            not name or not age or not gender or not movie_ids
+        ):  # Add more conditions if needed
+         return jsonify({"error": "Please fill out all required fields."}), 400
 
-            actor.update()
+        movie_ids_set = set([int(movie_id) for movie_id in movie_ids.split(",")])
+            # Query the movies with the specified IDs
+        movies = Movie.query.filter(Movie.id.in_(movie_ids_set)).all()
 
-        return redirect(url_for("actors"))
+        fetched_movie_ids_set = set([movie.id for movie in movies])
+
+            # Ensure that the lists are the same
+        if fetched_movie_ids_set == movie_ids_set:
+            pass
+                # print("The lists are the same.")
+        else:
+                # print("The lists are different.")
+                # Find the difference between the lists
+            difference = movie_ids_set - fetched_movie_ids_set
+                # print("Difference:", list(difference))
+            return jsonify(
+                {"error": "Some movie ids are invalid: {}".format(difference)}
+            ), 400
+
+        actor.name = name
+        actor.age = age
+        actor.gender = gender
+        actor.movies.extend(movies)
+
+        actor.update()
+
+        # Include the updated movie details in the response
+        return jsonify(
+            {
+                "message": "Actor updated successfully",
+                "actor": {
+                    "id": actor.id,
+                    "name": actor.name,
+                    "age": actor.age,
+                    "gender": actor.gender,
+                    "movies": [
+                        {"id": movie.id, "title": movie.title} for movie in actor.movies
+                    ],
+                },
+            }
+        )
+
 
     @app.route("/delete_movie/<int:movie_id>", methods=["POST"])
     @requires_auth("delete:movies")
@@ -301,11 +369,12 @@ def create_app(test_config=None):
         )  # Redirect to the movies page or home page
 
     @app.route("/delete_actor/<int:actor_id>", methods=["POST"])
-    def delete_actor(actor_id):
+    @requires_auth("delete:actors")
+    def delete_actor(payload, actor_id):
         actor = Actor.query.get(actor_id)
         if actor:
             actor.delete()
-        return redirect(url_for("actors"))  # Redirect to the actors page or home page
+        return redirect(url_for("view_actors"))  # Redirect to the actors page or home page
 
     @app.errorhandler(AuthError)
     def handle_auth_error(ex):
