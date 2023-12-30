@@ -9,8 +9,8 @@ db = SQLAlchemy()
 # Association Table
 actor_movie_association = db.Table(
     "actor_movie_association",
-    db.Column("actor_id", db.Integer, db.ForeignKey("actors.id")),
-    db.Column("movie_id", db.Integer, db.ForeignKey("movies.id")),
+    db.Column("actor_id", db.Integer, db.ForeignKey("actors.id"), primary_key=True),
+    db.Column("movie_id", db.Integer, db.ForeignKey("movies.id"), primary_key=True),
 )
 
 
