@@ -8,21 +8,128 @@
 </head>
 <body>
     <h1>Edit Actor</h1>
-    <form action="{{ url_for('edit_actor', actor_id=actor.id) }}" method="post">
+    <!-- Form for editing movie data -->
+    <form id="editForm" data-actorid="{{ actor_id }}">
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name" value="{{ actor.name }}" required>
+        <input type="text" id="name" name="name" required>
 
         <label for="age">Age:</label>
-        <input type="number" id="age" name="age" value="{{ actor.age }}" required>
+        <input type="number" id="age" name="age" required>
 
-        <label for="gender">Gender:</label>
-        <input type="text" id="gender" name="gender" value="{{ actor.gender }}" required>
+        <label for="gender">Actor Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        </select>
 
-        <label for="movie_id">Movie ID:</label>
-        <input type="number" id="movie_id" name="movie_id" value="{{ actor.movie_id }}" required>
+        <label for="movie_ids">Movie IDs (comma-separated):</label>
+        <input type="text" id="movie_ids" name="movie_ids">
 
-        <input type="submit" value="Save Changes">
+        <input type="submit" value="Update Actor">
     </form>
-    <p class="button"><a href="{{ url_for('actors') }}">Go back to Actor <span class="emoji">🧑🎭</span></a></p>
+
+    <!-- JavaScript to populate form fields and handle form submission -->
+    <!-- TODO: get actordata via JSON endpoints that's protected by auth, 
+        otherwise you are leaking data -->
+    <script>
+        // Get the actor_id passed from the Flask route
+        var actor_id = document.getElementById('editForm').dataset.actorid;
+        // Log the value to the console (you can use it as needed)
+        console.log("Actor ID:", actor_id);
+
+        function getCookie(auth_token) {
+            const value = `; ${document.cookie} `;
+            const parts = value.split(`; ${auth_token}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        const token = getCookie("auth_token");
+        // check for token Available if not to show errer
+        if (!token) {
+            // Show an error message or take appropriate action
+            showError("Authentication token not found. Please log in.");
+        }
+
+
+        // Populate form fields with movie data and actor names
+        async function populateForm() {
+            // Make a request to update the movie data with updatedData
+            const response = await fetch(`/get_actor/${actor_id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token} `,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                alert("Error getting Actor data...");
+            }
+
+            jsonData = await response.json()
+
+            console.log(jsonData)
+
+            actorData = jsonData.actor
+
+            document.getElementById('name').value = actorData.name;
+            document.getElementById('age').value = actorData.age;
+            document.getElementById('gender').value = actorData.gender;
+            document.getElementById('movie_ids').value = actorData.movies.map(movie => movie.id).join(', ');
+
+        }
+        // Call the function to populate the form
+        populateForm();
+
+
+        // Form submission handler
+        document.getElementById('editForm').onsubmit = async function (event) {
+            event.preventDefault();
+
+            // Retrieve updated form data
+            const updatedData = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                movie_ids: document.getElementById('movie_ids').value,
+            };
+
+            try {
+                // Make a request to update the actor data with updatedData
+                const response = await fetch(`/edit_actor/${actor_id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token} `,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (response.ok) {
+                    // Handle success (redirect, refresh, etc.)
+                    window.location.href = "{{ url_for('view_actors') }}";
+                } else {
+                    // extract error message from response
+                    var msg = "Error updating Actor"
+                    // use await because we get a promise
+                    const errorJson = await response.json();
+                    console.log(errorJson)
+                    if (errorJson.code != null) {
+                        msg = `${msg}: ${errorJson.code} `;
+                    }
+                    if (errorJson.description != null) {
+                        msg = `${msg}: ${errorJson.description}`;
+                    }
+                    if (errorJson.error != null) {
+                        msg = `${msg}: ${errorJson.error}`;
+                    }
+                    alert(msg);
+                }
+            } catch (error) {
+                console.error('Error updating Actor:', error);
+            }
+        };
+    </script>
+    
+    <p class="button"><a href="{{ url_for('view_actors') }}">Go back to Actor <span class="emoji">🧑🎭</span></a></p>
 </body>
 </html>
