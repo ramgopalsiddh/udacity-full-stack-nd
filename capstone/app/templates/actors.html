@@ -6,9 +6,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Actor List</title>
+    <!-- Add for SweetAlert2 for show  custom aleart  -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 
 <body>
+    <script>
+        // Function to get cookie value by name
+            function getCookie(auth_token) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${auth_token}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+        // Function to fetch JSON data asynchronously
+        async function fetchData() {
+            const token = getCookie("auth_token");
+
+            // check for token Available if not to show errer
+            if (!token) {
+                // Show an error message or take appropriate action
+                showError("Authentication token not found. Please log in.");
+                return null;
+            }
+
+            const response = await fetch('/actors', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            const jsonData = await response.json();
+            console.log("Response => ", jsonData);
+
+            return jsonData;
+        }
+
+        // Function to show an error message using SweetAlert2 when user is logout
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                showCancelButton: true,
+                confirmButtonText: 'Go to Login', // button for redirect user to login page
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ url_for('main') }}"
+                }
+            })
+        }
+
+        // Function to join actors array into a comma-separated string
+        function joinActors(actors) {
+            return actors.map(actor => actor.name).join(', ');
+        }
+
+        // Function to build and display the table
+        async function buildTable() {
+            try {
+                const jsonData = await fetchData();
+                const tbody = document.getElementById("actors");
+                tbody.innerHTML = '';
+                // Create data rows
+                jsonData.actors.forEach(actor => {
+                    const row = tbody.insertRow();
+                    // for (const key in actor) {
+                    const id = row.insertCell()
+                    id.textContent = actor.id
+
+                    const name = row.insertCell()
+                    name.textContent = actor.name
+
+                    const age = row.insertCell()
+                    age.textContent = actor.age
+
+                    const gender = row.insertCell()
+                    gender.textContent = actor.gender
+
+
+                    const movieTitles = actor.movies.map(movie => movie.title).join(', ');
+                    const movieIds = actor.movies.map(movie => movie.id).join(', ');
+
+                    const movie = row.insertCell();
+                    movie.textContent = movieTitles;
+
+                    const movieId = row.insertCell();
+                    movieId.textContent = movieIds;
+
+                    //Edit Movies buttons
+                    const editCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit ✏️';
+                    editButton.addEventListener('click', () => editPage(actor.id));
+                    editCell.appendChild(editButton);
+
+                    async function editPage(actor_id) {
+                        window.location.pathname = ("/edit_actor_form/" + actor_id) // forward to edit actors route
+                    }
+
+                    //Delete actors button 
+                    const deleteCell = row.insertCell();
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete ⛔';
+                    deleteButton.addEventListener('click', () => deleteActor(actor.id));
+                    deleteCell.appendChild(deleteButton);
+
+                    // Function to handle delete actor route
+                    async function deleteActor(actorId) {
+                        if (confirm('Are you sure you want to delete this actor?')) {
+                            try {
+                                const token = getCookie("auth_token");
+                                const response = await fetch(`/delete_actor/${actorId}`, {
+                                    method: 'POST',  // Change to DELETE method if your server supports it
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                    },
+                                });
+                                // check responce of button
+                                if (response.ok) {
+                                    alert('Actor deleted successfully');
+                                    // Refresh the page after a short delay for rerender table after delete movie
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 500);
+                                } else {
+                                    // extract error message from response
+                                    var msg = "Error updating actor"
+                                    // use await because we get a promise
+                                    const errorJson = await response.json();
+                                    console.log(errorJson)
+                                    if (errorJson.code != null) {
+                                        msg = `${msg}: ${errorJson.code} `;
+                                    }
+                                    if (errorJson.description != null) {
+                                        msg = `${msg}: ${errorJson.description}`;
+                                    }
+                                    alert(msg);
+                                }
+                            } catch (error) {
+                                console.error('Error deleting actor:', error);
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        // Call the function to build the table
+        buildTable();
+        // document.getElementById('getMoviesButton').addEventListener('click', buildTable());
+    </script>
+
     <h1>Actors</h1>
     <table border="1">
         <thead>
@@ -24,28 +176,9 @@
 
             </tr>
         </thead>
-        <tbody>
-            {% for actor in actors %}
-            <tr>
-                <td>{{ actor.id }}</td>
-                <td>{{ actor.name }}</td>
-                <td>{{ actor.age }}</td>
-                <td>{{ actor.gender }}</td>
-                <td>{{ actor.movies | map(attribute='title') | join(', ') }}</td>
-                <td>{{ actor.movies | map(attribute='id') | join(', ') }}</td>
-                <td>
-                    <a href="{{ url_for('edit_actor_form', actor_id=actor.id) }}"><button>Edit ✏️</button></a>
-                </td>
-                <td>
-                    <form action="{{ url_for('delete_actor', actor_id=actor.id) }}" method="post">
-                        <button type="submit">Delete ⛔</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+        <tbody id="actors"></tbody>
     </table>
-    <p class="button"><a href="{{ url_for('main') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+   <p class="button"><a href="{{ url_for('main') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
 
 </html>
