@@ -112,7 +112,7 @@
             try {
                 // Make a request to update the movie data with updatedData
                 const response = await fetch(`/edit_movie/${movie_id}`, {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: {
                         'Authorization': `Bearer ${token} `,
                         'Content-Type': 'application/json'
