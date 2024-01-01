@@ -259,7 +259,7 @@ def create_app(test_config=None):
         # Render an HTML template with the JSON data
         return render_template("edit_movie_form.html", movie_id=movie_id)
 
-    @app.route("/edit_movie/<int:movie_id>", methods=["POST"])
+    @app.route("/edit_movie/<int:movie_id>", methods=["PATCH"])
     @requires_auth("update:movies")
     def edit_movie(payload, movie_id):
         movie = Movie.query.get(movie_id)
@@ -297,65 +297,48 @@ def create_app(test_config=None):
         # movie_ids = [movie.id for movie in actor.movies] if actor.movies else []
         return render_template("edit_actor_form.html", actor_id=actor_id)
 
-    @app.route("/edit_actor/<int:actor_id>", methods=["POST"])
+    @app.route("/edit_actor/<int:actor_id>", methods=["PATCH"])
     @requires_auth("update:actors")
     def edit_actor(payload, actor_id):
         actor = Actor.query.get(actor_id)
         if not actor:
             raise NotFoundError
 
-        data = request.json  # Use request.json to parse JSON data
+        data = request.json
         name = data.get("name")
         age = data.get("age")
         gender = data.get("gender")
         movie_ids = data.get("movie_ids")
 
-        if (
-            not name or not age or not gender or not movie_ids
-        ):  # Add more conditions if needed
-         return jsonify({"error": "Please fill out all required fields."}), 400
+        if not name or not age or not gender or not movie_ids:
+            return jsonify({"error": "Please fill out all required fields."}), 400
 
-        movie_ids_set = set([int(movie_id) for movie_id in movie_ids.split(",")])
-            # Query the movies with the specified IDs
-        movies = Movie.query.filter(Movie.id.in_(movie_ids_set)).all()
+        # Convert comma-separated movie_ids to a list of integers
+        movie_ids_list = [int(movie_id) for movie_id in movie_ids.split(",")]
+
+        # Query the movies with the specified IDs
+        movies = Movie.query.filter(Movie.id.in_(movie_ids_list)).all()
 
         fetched_movie_ids_set = set([movie.id for movie in movies])
 
-            # Ensure that the lists are the same
-        if fetched_movie_ids_set == movie_ids_set:
-            pass
-                # print("The lists are the same.")
-        else:
-                # print("The lists are different.")
-                # Find the difference between the lists
-            difference = movie_ids_set - fetched_movie_ids_set
-                # print("Difference:", list(difference))
-            return jsonify(
-                {"error": "Some movie ids are invalid: {}".format(difference)}
-            ), 400
+        # Ensure that the lists are the same
+        if fetched_movie_ids_set == set(movie_ids_list):
+            # Clear existing associations
+            actor.movies.clear()
+            # Add the new associations
+            actor.movies.extend(movies)
+            # Update other actor attributes
+            actor.name = name
+            actor.age = age
+            actor.gender = gender
 
-        actor.name = name
-        actor.age = age
-        actor.gender = gender
-        actor.movies.extend(movies)
+            actor.update()
+            return jsonify({"success": True, "actor": actor.format()}), 200
 
-        actor.update()
+        # Find the difference between the lists
+        difference = set(movie_ids_list) - fetched_movie_ids_set
+        return jsonify({"error": f"Some movie ids are invalid: {list(difference)}"}), 400
 
-        # Include the updated movie details in the response
-        return jsonify(
-            {
-                "message": "Actor updated successfully",
-                "actor": {
-                    "id": actor.id,
-                    "name": actor.name,
-                    "age": actor.age,
-                    "gender": actor.gender,
-                    "movies": [
-                        {"id": movie.id, "title": movie.title} for movie in actor.movies
-                    ],
-                },
-            }
-        )
 
 
     @app.route("/delete_movie/<int:movie_id>", methods=["POST"])
