@@ -1,31 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Create Actor</title>
+    <title>Create Actor </title>
 </head>
+
 <body>
-    <h1>Create Actor</h1>
-    <form action="{{ url_for('create_actor') }}" method="post">
-        <label for="name">Name:</label>
+    <h1>Create Actor </h1>
+    <form id="createForm">
+        <!-- Actor Fields -->
+        <label for="name">Actor Name:</label>
         <input type="text" id="name" name="name" required>
-        
-        <label for="age">Age:</label>
+
+        <label for="age">Actor Age:</label>
         <input type="number" id="age" name="age" required>
 
-        <label for="gender">Gender:</label>
+        <label for="gender">Actor Gender:</label>
         <select id="gender" name="gender" required>
             <option value="M">Male</option>
             <option value="F">Female</option>
         </select>
 
-        <label for="movie_id">Movie ID:</label>
-        <input type="number" id="movie_id" name="movie_id" required>
+        <!-- Movie Fields -->
+        <label for="movie_ids">Movie IDs (comma-separated):</label>
+        <input type="text" id="movie_ids" name="movie_ids">
 
-        <input type="submit" value="Create Actor">
+        <input type="submit" value="Create Actor ">
     </form>
-    <p class="button"><a href="{{ url_for('index') }}">Go back to Home <span class="emoji">🏠</span></a></p>
+
+    <script>
+        // Function to get the authentication token from cookies
+        function getCookie(auth_token) {
+            const value = `; ${document.cookie} `;
+            const parts = value.split('; auth_token=');
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        // Function to handle form submission
+        document.getElementById('createForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Retrieve form data
+            const formData = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                movie_ids: document.getElementById('movie_ids').value,
+            };
+
+            try {
+                const token = getCookie("auth_token");
+                // Make a request to create a movie
+                const response = await fetch('/create_actor', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token} `,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    // Handle success (redirect, refresh, etc.)
+                    window.location.href = "{{ url_for('view_actors') }}";
+                    //alert('Movie Created successfully');
+                } else {
+                    // extract error message from response
+                    var msg = "Error updating actor"
+                    // use await because we get a promise
+                    const errorJson = await response.json();
+                    console.log(errorJson)
+                    if (errorJson.code != null) {
+                        msg = `${msg}: ${errorJson.code} `;
+                    }
+                    if (errorJson.description != null) {
+                        msg = `${msg}: ${errorJson.description}`;
+                    }
+                    if (errorJson.error != null) {
+                        msg = `${msg}: ${errorJson.error}`;
+                    }
+                    alert(msg);
+                }
+            } catch (error) {
+                console.error('Error creating Actor:', error);
+            }
+        });
+
+    </script>
+
+    <p class="button"><a href="{{ url_for('main') }}">Go back to Home <span class="emoji">🏠</span></a></p>
 </body>
+
 </html>
