@@ -65,7 +65,7 @@ This project is simply a workspace for practicing and showcasing different set o
    <img src="screenshots/actor_delete_1.png"/>
    <img src="screenshots/actor_delete_2.png"/>
 
-### Try to acess data by route without logout
+### Try to acess data by route without login
    <img src="screenshots/logout_and_try_to_access_data_by_route.png"/>
 
 ### When don't have permisson and try to perform task
