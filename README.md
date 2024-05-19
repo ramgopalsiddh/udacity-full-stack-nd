@@ -25,3 +25,10 @@ This repo contains code from my Full Stack Web Developer NanoDegree course.
 - LINK -  https://github.com/ramgopalsiddh/udacity-full-stack-nd/tree/main/capstone
 
 - DEMO VIDEO - https://youtu.be/O02NiBLoulo
+
+
+## For more info OR suggestion contact me on
+
+- ### My Twitter :- <a href="https://twitter.com/ramgopalsiddh1/"> Twitter/ramgopal </a>
+
+- ### Portfolio :- <a href="https://ramgopal.dev/">ramgopal.dev</a>
